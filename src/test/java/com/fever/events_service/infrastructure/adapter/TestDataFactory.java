@@ -1,4 +1,4 @@
-package com.fever.events_service.infrastructure.adapter.out.persistence;
+package com.fever.events_service.infrastructure.adapter;
 
 import com.fever.events_service.domain.models.Event;
 import com.fever.events_service.domain.models.Zone;

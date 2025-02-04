@@ -1,6 +1,7 @@
 package com.fever.events_service.infrastructure.adapter.out.persistence;
 
 import com.fever.events_service.domain.models.Event;
+import com.fever.events_service.infrastructure.adapter.TestDataFactory;
 import com.fever.events_service.infrastructure.adapters.out.persistence.*;
 import com.fever.events_service.infrastructure.adapters.out.persistence.entities.EventEntity;
 import org.junit.jupiter.api.BeforeEach;

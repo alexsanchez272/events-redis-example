@@ -2,9 +2,9 @@ package com.fever.events_service.infrastructure.adapter.out.persistence;
 
 import com.fever.events_service.domain.models.Event;
 import com.fever.events_service.domain.models.Zone;
+import com.fever.events_service.infrastructure.adapter.TestDataFactory;
 import com.fever.events_service.infrastructure.adapters.out.persistence.EventMapper;
 import com.fever.events_service.infrastructure.adapters.out.persistence.EventPersistenceAdapter;
-import com.fever.events_service.infrastructure.adapters.out.persistence.EventRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -23,9 +23,6 @@ class EventPersistenceAdapterIntegrationTest {
 
     @Autowired
     private EventPersistenceAdapter eventPersistenceAdapter;
-
-    @Autowired
-    private EventRepository eventRepository;
 
     @Test
     void shouldPersistAndRetrieveEventsCorrectly() {

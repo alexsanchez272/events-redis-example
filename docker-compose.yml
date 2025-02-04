@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database service
+  postgres:
+    image: postgres:13
+    container_name: fever-postgres
+    environment:
+      POSTGRES_DB: fever_events
+      POSTGRES_USER: fever_user
+      POSTGRES_PASSWORD: fever_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fever_user -d fever_events"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis cache service
+  redis:
+    image: redis:6
+    container_name: fever-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Spring Boot application service
+  app:
+    build: .
+    container_name: fever-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # Database connection settings
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/fever_events
+      SPRING_DATASOURCE_USERNAME: fever_user
+      SPRING_DATASOURCE_PASSWORD: fever_password
+      # Redis connection settings
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      # Active Spring profile
+      SPRING_PROFILES_ACTIVE: dev
+    restart: unless-stopped
+
+# Persistent volumes for data storage
+volumes:
+  postgres_data:  # Stores PostgreSQL data
+  redis_data:     # Stores Redis data

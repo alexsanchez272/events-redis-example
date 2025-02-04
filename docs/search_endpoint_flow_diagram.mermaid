@@ -1,0 +1,10 @@
+flowchart TD
+    A[Cliente: GET /search?starts_at=X&ends_at=Y] --> B[Controlador REST]
+    B --> C{¿Resultado en Redis Cache?}
+    C -- Sí --> D[Devolver resultado desde Cache]
+    C -- No --> E[Consultar PostgreSQL]
+    E --> F[Procesar y Formatear Resultado]
+    F --> G[Almacenar resultado en Redis con TTL]
+    G --> H[Devolver resultado al Cliente]
+    D --> H
+    H --> I[Fin]

@@ -1,0 +1,19 @@
+sequenceDiagram
+    participant C as Cliente
+    participant R as Controlador REST
+    participant RC as Redis Cache
+    participant PG as PostgreSQL
+    participant P as Procesador
+
+    C->>R: GET /search?starts_at=X&ends_at=Y
+    R->>RC: Verificar cache
+    alt Resultado en cache
+        RC-->>R: Devolver resultado cacheado
+    else Cache miss
+        R->>PG: Consultar eventos
+        PG-->>R: Devolver resultados
+        R->>P: Procesar y formatear resultados
+        P-->>R: Resultados formateados
+        R->>RC: Almacenar en cache (con TTL)
+    end
+    R->>C: Devolver resultado al cliente

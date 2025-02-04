@@ -1,0 +1,16 @@
+flowchart TD
+    A[Scheduler / Job Trigger] --> B[Llamar API del Proveedor Externo]
+    B --> C{¿Respuesta Exitosa?}
+    C -- No --> D[Registrar Error y Programar Reintento]
+    D --> L[Finalizar Ciclo de Sincronización]
+    C -- Sí --> E[Recibir XML del Proveedor]
+    E --> F[Parsear XML para extraer Eventos y Zonas]
+    F --> G[Iterar sobre cada Evento]
+    G --> H{¿Evento existe en DB?}
+    H -- Sí --> I[Actualizar registro de Evento y Zonas]
+    H -- No --> J[Insertar nuevo registro de Evento y Zonas]
+    I --> K[Invalidar/Actualizar Cache en Redis]
+    J --> K
+    K --> G
+    G -- Todos los eventos procesados --> L[Finalizar Ciclo de Sincronización]
+    L --> M[Fin]

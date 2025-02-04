@@ -1,0 +1,25 @@
+sequenceDiagram
+    participant S as Scheduler/Job
+    participant P as Proveedor Externo
+    participant X as Parser XML
+    participant DB as PostgreSQL
+    participant RC as Redis Cache
+
+    S->>P: Solicitar eventos (GET /api/events)
+    alt Respuesta exitosa
+        P-->>S: Devolver XML de eventos
+        S->>X: Parsear XML
+        X->>S: Eventos y zonas parseados
+        loop Para cada evento
+            S->>DB: Verificar existencia del evento
+            alt Evento existe
+                S->>DB: Actualizar evento y zonas
+            else Evento no existe
+                S->>DB: Insertar nuevo evento y zonas
+            end
+            S->>RC: Invalidar/Actualizar cache
+        end
+    else Error en la respuesta
+        S->>S: Registrar error y programar reintento
+    end
+    S->>S: Finalizar ciclo de sincronización

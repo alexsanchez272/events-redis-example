@@ -1,4 +1,4 @@
-package com.fever.events_service.infrastructure.adapter.in.rest;
+package com.fever.events_service.infrastructure.adapter.out.http;
 
 import com.fever.events_service.domain.models.Event;
 import com.fever.events_service.domain.models.Zone;
@@ -23,7 +23,7 @@ class ProviderEventMapperTest {
     }
 
     @Test
-    void mapToEvents_shouldMapAllFieldsCorrectly() {
+    void shouldMapAllFieldsCorrectly() {
         List<ProviderBaseEventDTO> providerEvents = TestDataFactory.createMultipleProviderBaseEventDTOs();
 
         List<Event> mappedEvents = mapper.mapToEvents(providerEvents);
@@ -51,7 +51,7 @@ class ProviderEventMapperTest {
     }
 
     @Test
-    void mapToEvents_shouldConsolidateDuplicateZones() {
+    void shouldConsolidateDuplicateZones() {
         ProviderBaseEventDTO losMorancosEvent = TestDataFactory.createLosMorancosProviderBaseEventDTO();
 
         List<Event> mappedEvents = mapper.mapToEvents(List.of(losMorancosEvent));

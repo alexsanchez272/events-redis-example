@@ -76,6 +76,18 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- Retrofit -->
+		<dependency>
+			<groupId>com.squareup.retrofit2</groupId>
+			<artifactId>retrofit</artifactId>
+			<version>${retrofit.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.retrofit2</groupId>
+			<artifactId>converter-jaxb</artifactId>
+			<version>${retrofit.version}</version>
+		</dependency>
+
 		<!-- resilience4j -->
 		<dependency>
 			<groupId>io.github.resilience4j</groupId>

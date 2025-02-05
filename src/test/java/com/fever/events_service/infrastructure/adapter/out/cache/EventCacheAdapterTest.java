@@ -1,4 +1,4 @@
-package com.fever.events_service.infrastructure.adapter.cache;
+package com.fever.events_service.infrastructure.adapter.out.cache;
 
 import com.fever.events_service.domain.models.Event;
 import com.fever.events_service.infrastructure.adapter.TestDataFactory;
@@ -95,7 +95,7 @@ class EventCacheAdapterTest {
 
     @Test
     void shouldPersistSingleEventCorrectly() {
-        Event event = TestDataFactory.createTestEvent("291");
+        Event event = TestDataFactory.createEvent("291");
         eventCacheAdapter.cacheEvent(event);
 
         String expectedKey = cacheIdentifier + ":event:" + event.getBaseEventId();
@@ -104,7 +104,7 @@ class EventCacheAdapterTest {
 
     @Test
     void shouldRetrieveCachedEventWhenItExists() {
-        Event event = TestDataFactory.createTestEvent("291");
+        Event event = TestDataFactory.createEvent("291");
         String expectedKey = cacheIdentifier + ":event:" + event.getBaseEventId();
         when(valueOperations.get(eq(expectedKey))).thenReturn(event);
 

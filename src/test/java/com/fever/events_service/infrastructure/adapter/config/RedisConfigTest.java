@@ -1,4 +1,4 @@
-package com.fever.events_service.infrastructure.adapter.out.config;
+package com.fever.events_service.infrastructure.adapter.config;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

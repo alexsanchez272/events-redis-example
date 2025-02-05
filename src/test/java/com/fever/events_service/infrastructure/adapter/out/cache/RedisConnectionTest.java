@@ -1,4 +1,4 @@
-package com.fever.events_service.infrastructure.adapter.cache;
+package com.fever.events_service.infrastructure.adapter.out.cache;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

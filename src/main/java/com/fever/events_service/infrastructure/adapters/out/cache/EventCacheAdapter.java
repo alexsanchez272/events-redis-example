@@ -29,7 +29,7 @@ public class EventCacheAdapter implements EventCachePort {
         this.cacheTtl = cacheTtl;
         this.cacheIdentifier = cacheIdentifier;
     }
-
+    
     @Override
     public void cacheEvents(LocalDateTime startsAt, LocalDateTime endsAt, List<Event> events) {
         String key = generateRangeKey(startsAt, endsAt);

@@ -8,11 +8,12 @@ import com.fever.events_service.infrastructure.adapters.out.persistence.entities
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class TestDataFactory {
 
-    public static Event createTestEvent(String baseEventId) {
+    public static Event createEvent(String baseEventId) {
         switch (baseEventId) {
             case "291":
                 return createCamelaEvent();
@@ -23,6 +24,21 @@ public class TestDataFactory {
             default:
                 throw new IllegalArgumentException("Unknown base_event_id: " + baseEventId);
         }
+    }
+
+    public static Event createEvent(String baseEventId, String title, LocalDateTime startDate, LocalDateTime endDate) {
+        return Event.builder()
+                .baseEventId(baseEventId)
+                .eventId(baseEventId)
+                .title(title)
+                .sellMode("online")
+                .eventStartDate(startDate)
+                .eventEndDate(endDate)
+                .sellFrom(startDate.minusDays(30))
+                .sellTo(endDate.minusHours(1))
+                .soldOut(false)
+                .zones(Collections.emptyList())
+                .build();
     }
 
     private static Event createCamelaEvent() {
@@ -93,7 +109,7 @@ public class TestDataFactory {
     }
 
     public static EventEntity createTestEventEntity(String baseEventId) {
-        Event event = createTestEvent(baseEventId);
+        Event event = createEvent(baseEventId);
         EventEntity eventEntity = new EventEntity();
         eventEntity.setBaseEventId(event.getBaseEventId());
         eventEntity.setEventId(event.getEventId());
@@ -123,9 +139,9 @@ public class TestDataFactory {
 
     public static List<Event> createMultipleTestEvents() {
         return Arrays.asList(
-                createTestEvent("291"),
-                createTestEvent("322"),
-                createTestEvent("1591")
+                createEvent("291"),
+                createEvent("322"),
+                createEvent("1591")
         );
     }
 

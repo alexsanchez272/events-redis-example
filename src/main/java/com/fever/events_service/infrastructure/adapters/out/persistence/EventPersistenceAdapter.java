@@ -1,8 +1,7 @@
 package com.fever.events_service.infrastructure.adapters.out.persistence;
 
 import com.fever.events_service.domain.models.Event;
-import com.fever.events_service.domain.ports.out.FetchEventPort;
-import com.fever.events_service.domain.ports.out.SaveEventPort;
+import com.fever.events_service.domain.ports.out.EventPersistencePort;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -10,7 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class EventPersistenceAdapter implements FetchEventPort, SaveEventPort {
+public class EventPersistenceAdapter implements EventPersistencePort {
 
     private final EventRepository eventRepository;
     private final EventMapper eventMapper;

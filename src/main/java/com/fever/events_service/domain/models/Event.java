@@ -23,5 +23,6 @@ public class Event {
     private LocalDateTime sellFrom;
     private LocalDateTime sellTo;
     private boolean soldOut;
+    private boolean available;
     private List<Zone> zones;
 }

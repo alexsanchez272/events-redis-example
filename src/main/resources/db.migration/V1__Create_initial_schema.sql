@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS events (
-                                      base_event_id VARCHAR(255) PRIMARY KEY,
+    base_event_id VARCHAR(255) PRIMARY KEY,
     event_id VARCHAR(255) NOT NULL,
     title VARCHAR(255) NOT NULL,
     sell_mode VARCHAR(50) NOT NULL,
@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS events (
     end_date TIMESTAMP NOT NULL,
     sell_from TIMESTAMP NOT NULL,
     sell_to TIMESTAMP NOT NULL,
-    sold_out BOOLEAN NOT NULL
+    sold_out BOOLEAN NOT NULL,
+    available BOOLEAN NOT NULL DEFAULT TRUE
     );
 
 CREATE TABLE IF NOT EXISTS zones (

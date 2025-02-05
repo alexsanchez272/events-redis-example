@@ -2,7 +2,6 @@ package com.fever.events_service.infrastructure.exceptions;
 
 import com.fever.events_service.domain.exceptions.EventsNotFoundException;
 import com.fever.events_service.domain.exceptions.InvalidDateRangeException;
-import com.fever.events_service.domain.exceptions.ProviderCommunicationException;
 import com.fever.events_service.domain.models.error.Error;
 import com.fever.events_service.infrastructure.adapters.in.web.dto.EventResponseDTO;
 import org.springframework.http.HttpStatus;

@@ -23,6 +23,7 @@ public class EventMapper {
                 .sellFrom(entity.getSellFrom())
                 .sellTo(entity.getSellTo())
                 .soldOut(entity.isSoldOut())
+                .available(entity.isAvailable())
                 .zones(entity.getZones().stream()
                         .map(this::toZone)
                         .collect(Collectors.toList()))
@@ -53,6 +54,7 @@ public class EventMapper {
         entity.setSellFrom(event.getSellFrom());
         entity.setSellTo(event.getSellTo());
         entity.setSoldOut(event.isSoldOut());
+        entity.setAvailable(event.isAvailable());
         entity.setZones(event.getZones().stream()
                 .map(this::toZoneEntity)
                 .collect(Collectors.toList()));

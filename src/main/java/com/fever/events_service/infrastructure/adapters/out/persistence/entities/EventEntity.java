@@ -11,9 +11,9 @@ import java.util.List;
 @Data
 public class EventEntity {
     @Id
-    private String baseEventId;  // Primary identifier
+    private String baseEventId;
 
-    private String eventId;      // Secondary identifier
+    private String eventId;
     private String title;
     private String sellMode;
     private String organizerCompanyId;
@@ -22,6 +22,7 @@ public class EventEntity {
     private LocalDateTime sellFrom;
     private LocalDateTime sellTo;
     private boolean soldOut;
+    private boolean available;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "event_base_id")

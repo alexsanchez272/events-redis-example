@@ -29,7 +29,7 @@ public class TestDataFactory {
         }
     }
 
-    public static Event createEvent(String baseEventId, String title, LocalDateTime startDate, LocalDateTime endDate) {
+    public static Event createEvent(String baseEventId, String title, LocalDateTime startDate, LocalDateTime endDate, Boolean available) {
         return Event.builder()
                 .baseEventId(baseEventId)
                 .eventId(baseEventId)
@@ -40,6 +40,7 @@ public class TestDataFactory {
                 .sellFrom(startDate.minusDays(30))
                 .sellTo(endDate.minusHours(1))
                 .soldOut(false)
+                .available(available)
                 .zones(Collections.emptyList())
                 .build();
     }
@@ -55,6 +56,7 @@ public class TestDataFactory {
                 .sellFrom(LocalDateTime.parse("2020-07-01T00:00:00"))
                 .sellTo(LocalDateTime.parse("2021-06-30T20:00:00"))
                 .soldOut(false)
+                .available(true)
                 .zones(Arrays.asList(
                         createZone("40", "Platea", 243, 243, BigDecimal.valueOf(20.00), BigDecimal.valueOf(20.00), true)
                 ))
@@ -73,6 +75,26 @@ public class TestDataFactory {
                 .sellFrom(LocalDateTime.parse("2021-01-01T00:00:00"))
                 .sellTo(LocalDateTime.parse("2021-02-09T19:50:00"))
                 .soldOut(false)
+                .available(true)
+                .zones(Arrays.asList(
+                        createZone("311", "A42", 2, 2, BigDecimal.valueOf(55.00), BigDecimal.valueOf(55.00), true)
+                ))
+                .build();
+    }
+
+    private static Event createNotAvailableEvent() {
+        return Event.builder()
+                .baseEventId("322")
+                .eventId("1642")
+                .title("Sabina")
+                .sellMode("online")
+                .organizerCompanyId("2")
+                .startDate(LocalDateTime.parse("2021-02-10T20:00:00"))
+                .endDate(LocalDateTime.parse("2021-02-10T21:30:00"))
+                .sellFrom(LocalDateTime.parse("2021-01-01T00:00:00"))
+                .sellTo(LocalDateTime.parse("2021-02-09T19:50:00"))
+                .soldOut(true)
+                .available(false)
                 .zones(Arrays.asList(
                         createZone("311", "A42", 2, 2, BigDecimal.valueOf(55.00), BigDecimal.valueOf(55.00), true)
                 ))
@@ -91,6 +113,7 @@ public class TestDataFactory {
                 .sellFrom(LocalDateTime.parse("2021-06-26T00:00:00"))
                 .sellTo(LocalDateTime.parse("2021-07-31T19:50:00"))
                 .soldOut(false)
+                .available(true)
                 .zones(Arrays.asList(
                         createZone("186", "Amfiteatre", 2, 16, BigDecimal.valueOf(65.00), BigDecimal.valueOf(75.00), true)
                 ))
@@ -109,7 +132,7 @@ public class TestDataFactory {
                 .build();
     }
 
-    public static EventEntity createTestEventEntity(String baseEventId) {
+    public static EventEntity createTestEventEntity(String baseEventId, Boolean available) {
         Event event = createEvent(baseEventId);
         EventEntity eventEntity = new EventEntity();
         eventEntity.setBaseEventId(event.getBaseEventId());
@@ -122,6 +145,7 @@ public class TestDataFactory {
         eventEntity.setSellFrom(event.getSellFrom());
         eventEntity.setSellTo(event.getSellTo());
         eventEntity.setSoldOut(event.isSoldOut());
+        eventEntity.setAvailable(available);
         eventEntity.setZones(event.getZones().stream().map(TestDataFactory::createZoneEntity).toList());
         return eventEntity;
     }
@@ -148,9 +172,9 @@ public class TestDataFactory {
 
     public static List<EventEntity> createMultipleTestEventEntities() {
         return Arrays.asList(
-                createTestEventEntity("291"),
-                createTestEventEntity("322"),
-                createTestEventEntity("1591")
+                createTestEventEntity("291", true),
+                createTestEventEntity("322", true),
+                createTestEventEntity("1591", true)
         );
     }
 

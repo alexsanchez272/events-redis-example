@@ -34,6 +34,7 @@
 		<test.containers.postgresql.version>1.20.4</test.containers.postgresql.version>
 		<resilience4j.version>2.3.0</resilience4j.version>
 		<jackson-dataformat-xml.version>2.18.2</jackson-dataformat-xml.version>
+		<retrofit.version>2.11.0</retrofit.version>
 	</properties>
 	<dependencies>
 		<!-- Spring Boot Starters -->
@@ -75,6 +76,28 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- resilience4j -->
+		<dependency>
+			<groupId>io.github.resilience4j</groupId>
+			<artifactId>resilience4j-spring-boot2</artifactId>
+			<version>${resilience4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.resilience4j</groupId>
+			<artifactId>resilience4j-circuitbreaker</artifactId>
+			<version>${resilience4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.resilience4j</groupId>
+			<artifactId>resilience4j-retry</artifactId>
+			<version>${resilience4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.resilience4j</groupId>
+			<artifactId>resilience4j-bulkhead</artifactId>
+			<version>${resilience4j.version}</version>
+		</dependency>
+
 		<!-- Utilities -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -85,11 +108,6 @@
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-xml</artifactId>
 			<version>${jackson-dataformat-xml.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.github.resilience4j</groupId>
-			<artifactId>resilience4j-spring-boot2</artifactId>
-			<version>${resilience4j.version}</version>
 		</dependency>
 
 		<!-- Jackson JSR-310: Java 8 Date/Time support -->

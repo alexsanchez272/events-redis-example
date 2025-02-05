@@ -2,6 +2,9 @@ package com.fever.events_service.infrastructure.adapter;
 
 import com.fever.events_service.domain.models.Event;
 import com.fever.events_service.domain.models.Zone;
+import com.fever.events_service.infrastructure.adapters.in.rest.dto.ProviderBaseEventDTO;
+import com.fever.events_service.infrastructure.adapters.in.rest.dto.ProviderEventDTO;
+import com.fever.events_service.infrastructure.adapters.in.rest.dto.ProviderZoneDTO;
 import com.fever.events_service.infrastructure.adapters.out.persistence.entities.EventEntity;
 import com.fever.events_service.infrastructure.adapters.out.persistence.entities.ZoneEntity;
 
@@ -32,8 +35,8 @@ public class TestDataFactory {
                 .eventId(baseEventId)
                 .title(title)
                 .sellMode("online")
-                .eventStartDate(startDate)
-                .eventEndDate(endDate)
+                .startDate(startDate)
+                .endDate(endDate)
                 .sellFrom(startDate.minusDays(30))
                 .sellTo(endDate.minusHours(1))
                 .soldOut(false)
@@ -47,15 +50,13 @@ public class TestDataFactory {
                 .eventId("291")
                 .title("Camela en concierto")
                 .sellMode("online")
-                .eventStartDate(LocalDateTime.parse("2021-06-30T21:00:00"))
-                .eventEndDate(LocalDateTime.parse("2021-06-30T22:00:00"))
+                .startDate(LocalDateTime.parse("2021-06-30T21:00:00"))
+                .endDate(LocalDateTime.parse("2021-06-30T22:00:00"))
                 .sellFrom(LocalDateTime.parse("2020-07-01T00:00:00"))
                 .sellTo(LocalDateTime.parse("2021-06-30T20:00:00"))
                 .soldOut(false)
                 .zones(Arrays.asList(
-                        createZone("40", "Platea", 243, 243, BigDecimal.valueOf(20.00), BigDecimal.valueOf(20.00), true),
-                        createZone("38", "Grada 2", 100, 100, BigDecimal.valueOf(15.00), BigDecimal.valueOf(15.00), false),
-                        createZone("30", "A28", 90, 90, BigDecimal.valueOf(30.00), BigDecimal.valueOf(30.00), true)
+                        createZone("40", "Platea", 243, 243, BigDecimal.valueOf(20.00), BigDecimal.valueOf(20.00), true)
                 ))
                 .build();
     }
@@ -67,8 +68,8 @@ public class TestDataFactory {
                 .title("Pantomima Full")
                 .sellMode("online")
                 .organizerCompanyId("2")
-                .eventStartDate(LocalDateTime.parse("2021-02-10T20:00:00"))
-                .eventEndDate(LocalDateTime.parse("2021-02-10T21:30:00"))
+                .startDate(LocalDateTime.parse("2021-02-10T20:00:00"))
+                .endDate(LocalDateTime.parse("2021-02-10T21:30:00"))
                 .sellFrom(LocalDateTime.parse("2021-01-01T00:00:00"))
                 .sellTo(LocalDateTime.parse("2021-02-09T19:50:00"))
                 .soldOut(false)
@@ -85,8 +86,8 @@ public class TestDataFactory {
                 .title("Los Morancos")
                 .sellMode("online")
                 .organizerCompanyId("1")
-                .eventStartDate(LocalDateTime.parse("2021-07-31T20:00:00"))
-                .eventEndDate(LocalDateTime.parse("2021-07-31T21:00:00"))
+                .startDate(LocalDateTime.parse("2021-07-31T20:00:00"))
+                .endDate(LocalDateTime.parse("2021-07-31T21:00:00"))
                 .sellFrom(LocalDateTime.parse("2021-06-26T00:00:00"))
                 .sellTo(LocalDateTime.parse("2021-07-31T19:50:00"))
                 .soldOut(false)
@@ -116,8 +117,8 @@ public class TestDataFactory {
         eventEntity.setTitle(event.getTitle());
         eventEntity.setSellMode(event.getSellMode());
         eventEntity.setOrganizerCompanyId(event.getOrganizerCompanyId());
-        eventEntity.setStartDate(event.getEventStartDate());
-        eventEntity.setEndDate(event.getEventEndDate());
+        eventEntity.setStartDate(event.getStartDate());
+        eventEntity.setEndDate(event.getEndDate());
         eventEntity.setSellFrom(event.getSellFrom());
         eventEntity.setSellTo(event.getSellTo());
         eventEntity.setSoldOut(event.isSoldOut());
@@ -151,5 +152,62 @@ public class TestDataFactory {
                 createTestEventEntity("322"),
                 createTestEventEntity("1591")
         );
+    }
+
+    public static ProviderBaseEventDTO createProviderBaseEventDTO(String baseEventId) {
+        ProviderBaseEventDTO baseEventDTO = new ProviderBaseEventDTO();
+        baseEventDTO.setBaseEventId(baseEventId);
+        baseEventDTO.setTitle(createEvent(baseEventId).getTitle());
+        baseEventDTO.setEvents(Collections.singletonList(createProviderEventDTO(baseEventId)));
+        return baseEventDTO;
+    }
+
+    public static ProviderEventDTO createProviderEventDTO(String baseEventId) {
+        Event event = createEvent(baseEventId);
+        ProviderEventDTO eventDTO = new ProviderEventDTO();
+        eventDTO.setEventId(event.getEventId());
+        eventDTO.setStartDate(event.getStartDate());
+        eventDTO.setEndDate(event.getEndDate());
+        eventDTO.setSellFrom(event.getSellFrom());
+        eventDTO.setSellTo(event.getSellTo());
+        eventDTO.setSoldOut(event.isSoldOut());
+        eventDTO.setZones(event.getZones().stream().map(TestDataFactory::createProviderZoneDTO).toList());
+        return eventDTO;
+    }
+
+    private static ProviderZoneDTO createProviderZoneDTO(Zone zone) {
+        ProviderZoneDTO zoneDTO = new ProviderZoneDTO();
+        zoneDTO.setZoneId(zone.getZoneId());
+        zoneDTO.setName(zone.getName());
+        zoneDTO.setCapacity(zone.getMinCapacity());
+        zoneDTO.setPrice(zone.getMinPrice());
+        zoneDTO.setNumbered(zone.isNumbered());
+        return zoneDTO;
+    }
+
+    public static List<ProviderBaseEventDTO> createMultipleProviderBaseEventDTOs() {
+        return Arrays.asList(
+                createProviderBaseEventDTO("291"),
+                createProviderBaseEventDTO("322"),
+                createProviderBaseEventDTO("1591")
+        );
+    }
+
+    // Special method to create Los Morancos event with duplicate zones
+    public static ProviderBaseEventDTO createLosMorancosProviderBaseEventDTO() {
+        ProviderBaseEventDTO baseEventDTO = createProviderBaseEventDTO("1591");
+        ProviderEventDTO eventDTO = baseEventDTO.getEvents().get(0);
+
+        // Create duplicate zone with different capacity and price
+        ProviderZoneDTO zone1 = eventDTO.getZones().get(0);
+        ProviderZoneDTO zone2 = new ProviderZoneDTO();
+        zone2.setZoneId(zone1.getZoneId());
+        zone2.setName(zone1.getName());
+        zone2.setCapacity(16);
+        zone2.setPrice(BigDecimal.valueOf(75.00));
+        zone2.setNumbered(zone1.isNumbered());
+
+        eventDTO.setZones(Arrays.asList(zone1, zone2));
+        return baseEventDTO;
     }
 }

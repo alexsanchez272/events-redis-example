@@ -45,8 +45,8 @@ class EventPersistenceAdapterIntegrationTest {
             assertEquals(originalEvent.getTitle(), loadedEvent.getTitle());
             assertEquals(originalEvent.getSellMode(), loadedEvent.getSellMode());
             assertEquals(originalEvent.getOrganizerCompanyId(), loadedEvent.getOrganizerCompanyId());
-            assertEquals(originalEvent.getEventStartDate(), loadedEvent.getEventStartDate());
-            assertEquals(originalEvent.getEventEndDate(), loadedEvent.getEventEndDate());
+            assertEquals(originalEvent.getStartDate(), loadedEvent.getStartDate());
+            assertEquals(originalEvent.getEndDate(), loadedEvent.getEndDate());
             assertEquals(originalEvent.getSellFrom(), loadedEvent.getSellFrom());
             assertEquals(originalEvent.getSellTo(), loadedEvent.getSellTo());
             assertEquals(originalEvent.isSoldOut(), loadedEvent.isSoldOut());

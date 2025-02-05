@@ -18,8 +18,8 @@ public class EventMapper {
                 .title(entity.getTitle())
                 .sellMode(entity.getSellMode())
                 .organizerCompanyId(entity.getOrganizerCompanyId())
-                .eventStartDate(entity.getStartDate())
-                .eventEndDate(entity.getEndDate())
+                .startDate(entity.getStartDate())
+                .endDate(entity.getEndDate())
                 .sellFrom(entity.getSellFrom())
                 .sellTo(entity.getSellTo())
                 .soldOut(entity.isSoldOut())
@@ -48,8 +48,8 @@ public class EventMapper {
         entity.setTitle(event.getTitle());
         entity.setSellMode(event.getSellMode());
         entity.setOrganizerCompanyId(event.getOrganizerCompanyId());
-        entity.setStartDate(event.getEventStartDate());
-        entity.setEndDate(event.getEventEndDate());
+        entity.setStartDate(event.getStartDate());
+        entity.setEndDate(event.getEndDate());
         entity.setSellFrom(event.getSellFrom());
         entity.setSellTo(event.getSellTo());
         entity.setSoldOut(event.isSoldOut());

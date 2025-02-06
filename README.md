@@ -312,62 +312,72 @@ In an environment with frequent synchronization and a large volume of records, *
 - **Reduces application load**, avoiding full object transfers and working only with identifiers.
 
 While **Strategy 2** is simpler to implement, its higher database load makes it less suitable for high-volume and high-concurrency scenarios.
-## 8. Enfoque de Despliegue: Contenedores y Alternativas
+## 8. Deployment Approach: Containers and Alternatives
 
-#### 8.1 Uso de Docker y Docker Compose
-- Microservicio: Spring Boot + PostgreSQL + Redis en contenedores.
-- Entorno de desarrollo reproducible.
+#### 8.1 Using Docker and Docker Compose
+- Microservice: Spring Boot + PostgreSQL + Redis in containers.
+- Reproducible development environment.
 
-#### 8.2 Propuesta de alternativas para Producción
-- **Kubernetes:** Escalabilidad y gestión avanzada.
-- **Servicios en la Nube:** Amazon RDS y Amazon ElastiCache.
+#### 8.2 Alternative Proposals for Production
+- **Kubernetes:** Advanced scalability and management.
+- **Cloud Services:** Amazon RDS and Amazon ElastiCache.
 
+---
 
-## 9. Consideraciones Adicionales
-- **Configurabilidad de la Sincronización:** Frecuencia ajustable en el futuro.
-- **Manejo de Zonas Duplicadas:** Consolidación de datos.
-- **Conversión de Fechas:** Manejo con zona horaria definida.
+## 9. Additional Considerations
+- **Synchronization Configurability:** Adjustable frequency for future updates.
+- **Handling Duplicate Zones:** Data consolidation.
+- **Date Conversion:** Proper time zone management.
 
-## 10. Extra Mile: Escalabilidad y Rendimiento
-Aunque la solución propuesta cumple con los requisitos planteados y ofrece una base sólida, es importante considerar estrategias adicionales para escalar la aplicación y mejorar su rendimiento en escenarios reales. A continuación, se describen algunas recomendaciones y enfoques que se pueden aplicar para lograr una mayor escalabilidad y capacidad de respuesta, especialmente cuando se trabaja con archivos que contienen miles de eventos y cientos de zonas, y con picos de tráfico de entre 5k y 10k peticiones por segundo.
+---
 
-### 1. Optimización y Escalado de la Persistencia
+## 10. Extra Mile: Scalability and Performance
+While the proposed solution meets the stated requirements and provides a solid foundation, additional strategies should be considered to scale the application and improve its performance in real-world scenarios. Below are recommendations and approaches that can be applied to enhance scalability and responsiveness, especially when handling files containing thousands of events and hundreds of zones, with traffic peaks between 5k and 10k requests per second.
 
-#### Réplicas de Lectura en PostgreSQL
-Configurar réplicas de lectura para distribuir la carga de consultas puede mejorar significativamente el rendimiento del endpoint `/search`. Las réplicas permiten que las consultas se sirvan desde instancias separadas, reduciendo la presión sobre la base de datos principal y mejorando la capacidad de respuesta durante picos de tráfico.
+### 1. Persistence Optimization and Scaling
 
-#### Uso de Vistas Materializadas
-En escenarios donde la consulta de eventos requiere realizar cálculos complejos o unir múltiples tablas, el uso de vistas materializadas puede acelerar el procesamiento de las consultas. Estas vistas se pueden actualizar de forma periódica, ofreciendo un balance entre la frescura de los datos y el rendimiento.
+#### Read Replicas in PostgreSQL
+Configuring read replicas to distribute query load can significantly improve the performance of the `/search` endpoint. Replicas allow queries to be served from separate instances, reducing pressure on the primary database and improving responsiveness during traffic peaks.
 
-### 2. Despliegue y Orquestación en Entornos de Producción
+#### Use of Materialized Views
+In scenarios where event queries require complex calculations or multiple table joins, using materialized views can speed up query processing. These views can be periodically refreshed, providing a balance between data freshness and performance.
 
-#### Migración a Kubernetes
-Aunque Docker Compose es adecuado para entornos de desarrollo y pruebas, en producción se recomienda el uso de Kubernetes para:
+---
 
-- **Autoscaling:** Configurar escalado horizontal automático (Horizontal Pod Autoscaler) para ajustarse dinámicamente a la carga de tráfico.
-- **Gestión de Configuraciones y Secretos:** Utilizar un patron de **configuración centralizada** para administrar las configuraciones y credenciales, permitiendo cambios dinámicos sin necesidad de redeploy.
+### 2. Deployment and Orchestration in Production Environments
 
-#### Balanceo de Carga y CDN
-Utilizar balanceadores de carga robustos y considerar la implementación de una CDN (Content Delivery Network) para distribuir el tráfico y mejorar la latencia global, especialmente en entornos geográficamente dispersos.
+#### Migration to Kubernetes
+While Docker Compose is suitable for development and testing environments, Kubernetes is recommended for production to ensure:
 
-### 3. Monitoreo y Tuning en Tiempo Real
+- **Autoscaling:** Configuring horizontal auto-scaling (Horizontal Pod Autoscaler) to dynamically adjust to traffic load.
+- **Configuration and Secret Management:** Implementing a **centralized configuration pattern** to manage configurations and credentials, allowing dynamic updates without requiring redeployment.
 
-#### Herramientas de Monitoreo
-Implementar soluciones de monitoreo (como Datadog y openSearch / Prometheus, Grafana y ELK Stack) para observar el comportamiento del sistema en tiempo real. Esto incluye métricas de rendimiento de la base de datos, uso de memoria en Redis, tiempos de respuesta del endpoint y la carga en cada microservicio.
+#### Load Balancing and CDN
+Utilizing robust load balancers and considering the implementation of a Content Delivery Network (CDN) to distribute traffic and improve global latency, especially in geographically distributed environments.
 
-### 4. Consideraciones Adicionales
+---
 
-#### Optimización de la Lógica de Negocio
-Revisar periódicamente la lógica de procesamiento y actualización de eventos para identificar oportunidades de optimización, especialmente en la consolidación de zonas duplicadas y en la validación de datos.
+### 3. Real-Time Monitoring and Tuning
 
-#### Estrategia de Desacoplamiento
-Continuar utilizando la arquitectura hexagonal para mantener el desacoplamiento entre la lógica de negocio y las dependencias tecnológicas. Esto facilita la incorporación de nuevas tecnologías y permite que cada componente escale de forma independiente.
+#### Monitoring Tools
+Implementing monitoring solutions (such as Datadog, openSearch / Prometheus, Grafana, and ELK Stack) to track system behavior in real-time. This includes database performance metrics, Redis memory usage, endpoint response times, and microservice load levels.
 
-Estas estrategias garantizarán que la aplicación se mantenga operativa y eficiente, incluso en condiciones de carga extrema.
+---
 
-## 11. Conclusión
-Esta solución proporciona una arquitectura escalable, eficiente y mantenible para la integración de eventos del proveedor externo en el marketplace de Fever.
+### 4. Additional Considerations
 
+#### Business Logic Optimization
+Periodically reviewing event processing and update logic to identify optimization opportunities, particularly in consolidating duplicate zones and validating data.
+
+#### Decoupling Strategy
+Continuing the use of hexagonal architecture to maintain separation between business logic and technological dependencies. This facilitates the integration of new technologies and allows each component to scale independently.
+
+These strategies will ensure the application remains operational and efficient even under extreme load conditions.
+
+---
+
+## 11. Conclusion
+This solution provides a scalable, efficient, and maintainable architecture for integrating external provider events into the Fever marketplace.
 ---
 
 # 🚀 Fever Events Service - Setup Guide

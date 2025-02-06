@@ -1,6 +1,6 @@
 package com.fever.events_service.infrastructure.adapters.out.http;
 
-import com.fever.events_service.infrastructure.adapters.in.rest.dto.ProviderEventListDTO;
+import com.fever.events_service.infrastructure.adapters.out.http.dto.ProviderEventListDTO;
 import retrofit2.Call;
 import retrofit2.http.GET;
 

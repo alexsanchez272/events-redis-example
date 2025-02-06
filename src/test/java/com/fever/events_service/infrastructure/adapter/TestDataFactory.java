@@ -2,9 +2,9 @@ package com.fever.events_service.infrastructure.adapter;
 
 import com.fever.events_service.domain.models.Event;
 import com.fever.events_service.domain.models.Zone;
-import com.fever.events_service.infrastructure.adapters.in.rest.dto.ProviderBaseEventDTO;
-import com.fever.events_service.infrastructure.adapters.in.rest.dto.ProviderEventDTO;
-import com.fever.events_service.infrastructure.adapters.in.rest.dto.ProviderZoneDTO;
+import com.fever.events_service.infrastructure.adapters.out.http.dto.ProviderBaseEventDTO;
+import com.fever.events_service.infrastructure.adapters.out.http.dto.ProviderEventDTO;
+import com.fever.events_service.infrastructure.adapters.out.http.dto.ProviderZoneDTO;
 import com.fever.events_service.infrastructure.adapters.out.persistence.entities.EventEntity;
 import com.fever.events_service.infrastructure.adapters.out.persistence.entities.ZoneEntity;
 
@@ -182,7 +182,7 @@ public class TestDataFactory {
         ProviderBaseEventDTO baseEventDTO = new ProviderBaseEventDTO();
         baseEventDTO.setBaseEventId(baseEventId);
         baseEventDTO.setTitle(createEvent(baseEventId).getTitle());
-        baseEventDTO.setEvents(Collections.singletonList(createProviderEventDTO(baseEventId)));
+        baseEventDTO.setEvent(createProviderEventDTO(baseEventId));
         return baseEventDTO;
     }
 
@@ -217,12 +217,12 @@ public class TestDataFactory {
         );
     }
 
-    // Special method to create Los Morancos event with duplicate zones
+    // Metodo especial para crear el evento Los Morancos con zonas duplicadas
     public static ProviderBaseEventDTO createLosMorancosProviderBaseEventDTO() {
         ProviderBaseEventDTO baseEventDTO = createProviderBaseEventDTO("1591");
-        ProviderEventDTO eventDTO = baseEventDTO.getEvents().get(0);
+        ProviderEventDTO eventDTO = baseEventDTO.getEvent();
 
-        // Create duplicate zone with different capacity and price
+        // Crear zona duplicada con capacidad y precio diferente
         ProviderZoneDTO zone1 = eventDTO.getZones().get(0);
         ProviderZoneDTO zone2 = new ProviderZoneDTO();
         zone2.setZoneId(zone1.getZoneId());

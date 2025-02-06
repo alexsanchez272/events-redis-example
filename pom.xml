@@ -35,6 +35,7 @@
 		<resilience4j.version>2.3.0</resilience4j.version>
 		<jackson-dataformat-xml.version>2.18.2</jackson-dataformat-xml.version>
 		<retrofit.version>2.11.0</retrofit.version>
+		<logging-interceptor.version>4.10.0</logging-interceptor.version>
 	</properties>
 	<dependencies>
 		<!-- Spring Boot Starters -->
@@ -87,6 +88,17 @@
 			<artifactId>converter-jaxb</artifactId>
 			<version>${retrofit.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.squareup.retrofit2</groupId>
+			<artifactId>converter-jackson</artifactId>
+			<version>${retrofit.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>logging-interceptor</artifactId>
+			<version>${logging-interceptor.version}</version>
+		</dependency>
+
 
 		<!-- resilience4j -->
 		<dependency>
@@ -121,11 +133,26 @@
 			<artifactId>jackson-dataformat-xml</artifactId>
 			<version>${jackson-dataformat-xml.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+			<version>3.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-impl</artifactId>
+			<version>3.0.1</version>
+			<scope>runtime</scope>
+		</dependency>
 
 		<!-- Jackson JSR-310: Java 8 Date/Time support -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr310</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-xml</artifactId>
 		</dependency>
 
 		<!-- Testing -->

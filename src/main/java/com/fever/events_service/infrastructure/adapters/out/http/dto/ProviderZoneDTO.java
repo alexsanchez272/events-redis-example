@@ -1,4 +1,4 @@
-package com.fever.events_service.infrastructure.adapters.in.rest.dto;
+package com.fever.events_service.infrastructure.adapters.out.http.dto;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import lombok.Data;

@@ -22,7 +22,8 @@ public class EventEntity {
     private LocalDateTime sellFrom;
     private LocalDateTime sellTo;
     private boolean soldOut;
-    private boolean available;
+    @Column(name = "available", nullable = false)
+    private boolean available = true;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "event_base_id")

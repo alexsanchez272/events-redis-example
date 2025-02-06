@@ -1,4 +1,4 @@
-package com.fever.events_service.infrastructure.adapters.in.rest.dto;
+package com.fever.events_service.infrastructure.adapters.out.http.dto;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
@@ -14,11 +14,11 @@ public class ProviderEventDTO {
     @JacksonXmlProperty(localName = "event_id")
     private String eventId;
 
-    @JacksonXmlProperty(localName = "start_date")
+    @JacksonXmlProperty(localName = "event_start_date")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime startDate;
 
-    @JacksonXmlProperty(localName = "end_date")
+    @JacksonXmlProperty(localName = "event_end_date")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime endDate;
 

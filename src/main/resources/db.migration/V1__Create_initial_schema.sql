@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS events (
-    base_event_id VARCHAR(255) PRIMARY KEY,
+                                      base_event_id VARCHAR(255) PRIMARY KEY,
     event_id VARCHAR(255) NOT NULL,
     title VARCHAR(255) NOT NULL,
     sell_mode VARCHAR(50) NOT NULL,

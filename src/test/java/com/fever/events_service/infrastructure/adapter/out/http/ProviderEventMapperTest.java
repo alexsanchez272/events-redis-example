@@ -3,8 +3,8 @@ package com.fever.events_service.infrastructure.adapter.out.http;
 import com.fever.events_service.domain.models.Event;
 import com.fever.events_service.domain.models.Zone;
 import com.fever.events_service.infrastructure.adapter.TestDataFactory;
-import com.fever.events_service.infrastructure.adapters.in.rest.dto.ProviderBaseEventDTO;
-import com.fever.events_service.infrastructure.adapters.in.rest.mapper.ProviderEventMapper;
+import com.fever.events_service.infrastructure.adapters.out.http.dto.ProviderBaseEventDTO;
+import com.fever.events_service.infrastructure.adapters.out.http.mapper.ProviderEventMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -60,8 +60,8 @@ class ProviderEventMapperTest {
         Event event = mappedEvents.get(0);
         assertThat(event.getBaseEventId()).isEqualTo("1591");
         assertThat(event.getTitle()).isEqualTo("Los Morancos");
-
         assertThat(event.getZones()).hasSize(1);
+
         Zone consolidatedZone = event.getZones().get(0);
         assertThat(consolidatedZone.getZoneId()).isEqualTo("186");
         assertThat(consolidatedZone.getName()).isEqualTo("Amfiteatre");

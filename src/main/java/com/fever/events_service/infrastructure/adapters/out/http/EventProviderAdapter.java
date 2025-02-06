@@ -3,8 +3,8 @@ package com.fever.events_service.infrastructure.adapters.out.http;
 import com.fever.events_service.domain.exceptions.ProviderCommunicationException;
 import com.fever.events_service.domain.models.Event;
 import com.fever.events_service.domain.ports.out.EventProviderPort;
-import com.fever.events_service.infrastructure.adapters.in.rest.dto.ProviderEventListDTO;
-import com.fever.events_service.infrastructure.adapters.in.rest.mapper.ProviderEventMapper;
+import com.fever.events_service.infrastructure.adapters.out.http.dto.ProviderEventListDTO;
+import com.fever.events_service.infrastructure.adapters.out.http.mapper.ProviderEventMapper;
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -37,10 +37,17 @@ public class EventProviderAdapter implements EventProviderPort {
     public List<Event> fetchEvents() {
         try {
             log.info("process=fetch_events, status=init");
+            //TODO: Check Retrofit mapper
             Response<ProviderEventListDTO> response = providerApi.fetchEvents().execute();
             if (response.isSuccessful() && response.body() != null) {
-                log.info("process=fetch_events, status=success");
-                return providerEventMapper.mapToEvents(response.body().getBaseEvents());
+                ProviderEventListDTO eventListDTO = response.body();
+                if (eventListDTO.getOutput() != null && eventListDTO.getOutput().getBaseEvents() != null) {
+                    log.info("process=fetch_events, status=success, eventCount={}", eventListDTO.getOutput().getBaseEvents().size());
+                    return providerEventMapper.mapToEvents(eventListDTO.getOutput().getBaseEvents());
+                } else {
+                    log.warn("process=fetch_events, status=empty_response");
+                    return Collections.emptyList();
+                }
             } else {
                 log.error("process=fetch_events, status=error, errorCode={}", response.code());
                 throw new ProviderCommunicationException("Unsuccessful response from provider");
@@ -51,7 +58,7 @@ public class EventProviderAdapter implements EventProviderPort {
         }
     }
 
-    private List<Event> fallbackFetchEvents(ProviderCommunicationException e) {
+    private List<Event> fallbackFetchEvents(Exception e) {
         log.warn("process=fetch_events, status=fallback, errorMessage={}", e.getMessage());
         return Collections.emptyList();
     }

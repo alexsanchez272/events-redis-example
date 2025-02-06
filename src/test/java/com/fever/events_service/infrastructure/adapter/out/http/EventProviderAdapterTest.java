@@ -3,10 +3,13 @@ package com.fever.events_service.infrastructure.adapter.out.http;
 import com.fever.events_service.domain.exceptions.ProviderCommunicationException;
 import com.fever.events_service.domain.models.Event;
 import com.fever.events_service.infrastructure.adapter.TestDataFactory;
-import com.fever.events_service.infrastructure.adapters.in.rest.dto.ProviderEventListDTO;
-import com.fever.events_service.infrastructure.adapters.in.rest.mapper.ProviderEventMapper;
-import com.fever.events_service.infrastructure.adapters.out.http.EventProviderAdapter;
+import com.fever.events_service.infrastructure.adapters.out.http.dto.ProviderBaseEventDTO;
+import com.fever.events_service.infrastructure.adapters.out.http.dto.ProviderEventListDTO;
+import com.fever.events_service.infrastructure.adapters.out.http.dto.ProviderOutputDTO;
+import com.fever.events_service.infrastructure.adapters.out.http.mapper.ProviderEventMapper;
 import com.fever.events_service.infrastructure.adapters.out.http.ProviderApi;
+import com.fever.events_service.infrastructure.adapters.out.http.EventProviderAdapter;
+import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,14 +47,16 @@ class EventProviderAdapterTest {
     @Test
     void shouldFetchEventsSuccessfully() throws IOException {
         ProviderEventListDTO providerEventListDTO = new ProviderEventListDTO();
-        providerEventListDTO.setBaseEvents(TestDataFactory.createMultipleProviderBaseEventDTOs());
-        Response<ProviderEventListDTO> response = Response.success(providerEventListDTO);
+        ProviderOutputDTO output = new ProviderOutputDTO();
+        output.setBaseEvents(TestDataFactory.createMultipleProviderBaseEventDTOs());
+        providerEventListDTO.setOutput(output);
 
+        Response<ProviderEventListDTO> response = Response.success(providerEventListDTO);
         List<Event> expectedEvents = TestDataFactory.createMultipleTestEvents();
 
         when(providerApi.fetchEvents()).thenReturn(call);
         when(call.execute()).thenReturn(response);
-        when(providerEventMapper.mapToEvents(providerEventListDTO.getBaseEvents()))
+        when(providerEventMapper.mapToEvents(providerEventListDTO.getOutput().getBaseEvents()))
                 .thenReturn(expectedEvents);
 
         List<Event> actualEvents = eventProviderAdapter.fetchEvents();
@@ -59,7 +64,7 @@ class EventProviderAdapterTest {
         assertEquals(expectedEvents, actualEvents);
         verify(providerApi).fetchEvents();
         verify(call).execute();
-        verify(providerEventMapper).mapToEvents(providerEventListDTO.getBaseEvents());
+        verify(providerEventMapper).mapToEvents(providerEventListDTO.getOutput().getBaseEvents());
     }
 
     @Test
@@ -74,12 +79,34 @@ class EventProviderAdapterTest {
 
     @Test
     void shouldThrowProviderCommunicationExceptionWhenResponseIsUnsuccessful() throws IOException {
-        Response<ProviderEventListDTO> response = Response.error(500, ResponseBody.create(null, ""));
+        Response<ProviderEventListDTO> response = Response.error(500,
+                ResponseBody.create(MediaType.get("application/xml"), ""));
         when(providerApi.fetchEvents()).thenReturn(call);
         when(call.execute()).thenReturn(response);
 
         assertThrows(ProviderCommunicationException.class, () -> eventProviderAdapter.fetchEvents());
         verify(providerApi).fetchEvents();
         verify(call).execute();
+    }
+
+    /**
+     * Clase auxiliar para simular el DTO de salida.
+     * Si la clase OutputDTO se hace pública en el paquete correspondiente,
+     * se podría usar directamente esa clase.
+     */
+    public static class OutputDTO {
+        private List<ProviderBaseEventDTO> baseEvents;
+
+        public OutputDTO(List<ProviderBaseEventDTO> baseEvents) {
+            this.baseEvents = baseEvents;
+        }
+
+        public List<ProviderBaseEventDTO> getBaseEvents() {
+            return baseEvents;
+        }
+
+        public void setBaseEvents(List<ProviderBaseEventDTO> baseEvents) {
+            this.baseEvents = baseEvents;
+        }
     }
 }

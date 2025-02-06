@@ -369,6 +369,8 @@ Implementing monitoring solutions (such as Datadog, openSearch / Prometheus, Gra
 #### Business Logic Optimization
 Periodically reviewing event processing and update logic to identify optimization opportunities, particularly in consolidating duplicate zones and validating data.
 
+Although this version of the application was designed to function as middleware between a specific provider and Fever, it would be beneficial to consider early on whether to support the integration of additional providers through this service in the future. In such a case, the current project structure should be extended with a new field, provider_id, which must be taken into account when persisting or querying information in the database, as well as for any other necessary changes in the business logic. If this integration is required, it is advisable to address the change immediately during the development process to avoid extensive code refactoring later on.
+
 #### Decoupling Strategy
 Continuing the use of hexagonal architecture to maintain separation between business logic and technological dependencies. This facilitates the integration of new technologies and allows each component to scale independently.
 

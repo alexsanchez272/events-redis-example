@@ -30,7 +30,8 @@
    - [Beneficios ante los Requisitos](#beneficios-ante-los-requisitos)
 8. [Enfoque de Despliegue: Contenedores y Alternativas](#enfoque-de-despliegue-contenedores-y-alternativas)
 9. [Consideraciones Adicionales](#consideraciones-adicionales)
-10. [Conclusión](#conclusión)
+10. [Extra Mile: Escalabilidad y Rendimiento](#extra-mile)
+11. [Conclusión](#conclusión)
 
 ## 1. Introducción
 Este documento describe la solución propuesta para integrar los eventos provenientes de un proveedor externo en el marketplace de Fever. La solución debe considerarse como un microservicio con pensamiento a largo plazo, permitiendo que futuros desarrolladores puedan mantener, escalar y evolucionar el código sin dificultad. Se abordarán aspectos de persistencia, caché distribuido, comunicación entre microservicios, despliegue en contenedores y estrategias de actualización de datos.
@@ -384,6 +385,43 @@ Esta arquitectura **ofrece una base sólida para el crecimiento y mantenimiento 
 - **Configurabilidad de la Sincronización:** Frecuencia ajustable en el futuro.
 - **Manejo de Zonas Duplicadas:** Consolidación de datos.
 - **Conversión de Fechas:** Manejo con zona horaria definida.
+
+## 10. Extra Mile: Escalabilidad y Rendimiento
+Aunque la solución propuesta cumple con los requisitos planteados y ofrece una base sólida, es importante considerar estrategias adicionales para escalar la aplicación y mejorar su rendimiento en escenarios reales. A continuación, se describen algunas recomendaciones y enfoques que se pueden aplicar para lograr una mayor escalabilidad y capacidad de respuesta, especialmente cuando se trabaja con archivos que contienen miles de eventos y cientos de zonas, y con picos de tráfico de entre 5k y 10k peticiones por segundo.
+
+### 1. Optimización y Escalado de la Persistencia
+
+#### Réplicas de Lectura en PostgreSQL
+Configurar réplicas de lectura para distribuir la carga de consultas puede mejorar significativamente el rendimiento del endpoint `/search`. Las réplicas permiten que las consultas se sirvan desde instancias separadas, reduciendo la presión sobre la base de datos principal y mejorando la capacidad de respuesta durante picos de tráfico.
+
+#### Uso de Vistas Materializadas
+En escenarios donde la consulta de eventos requiere realizar cálculos complejos o unir múltiples tablas, el uso de vistas materializadas puede acelerar el procesamiento de las consultas. Estas vistas se pueden actualizar de forma periódica, ofreciendo un balance entre la frescura de los datos y el rendimiento.
+
+### 2. Despliegue y Orquestación en Entornos de Producción
+
+#### Migración a Kubernetes
+Aunque Docker Compose es adecuado para entornos de desarrollo y pruebas, en producción se recomienda el uso de Kubernetes para:
+
+- **Autoscaling:** Configurar escalado horizontal automático (Horizontal Pod Autoscaler) para ajustarse dinámicamente a la carga de tráfico.
+- **Gestión de Configuraciones y Secretos:** Utilizar un patron de **configuración centralizada** para administrar las configuraciones y credenciales, permitiendo cambios dinámicos sin necesidad de redeploy.
+
+#### Balanceo de Carga y CDN
+Utilizar balanceadores de carga robustos y considerar la implementación de una CDN (Content Delivery Network) para distribuir el tráfico y mejorar la latencia global, especialmente en entornos geográficamente dispersos.
+
+### 3. Monitoreo y Tuning en Tiempo Real
+
+#### Herramientas de Monitoreo
+Implementar soluciones de monitoreo (como Datadog y openSearch / Prometheus, Grafana y ELK Stack) para observar el comportamiento del sistema en tiempo real. Esto incluye métricas de rendimiento de la base de datos, uso de memoria en Redis, tiempos de respuesta del endpoint y la carga en cada microservicio.
+
+### 4. Consideraciones Adicionales
+
+#### Optimización de la Lógica de Negocio
+Revisar periódicamente la lógica de procesamiento y actualización de eventos para identificar oportunidades de optimización, especialmente en la consolidación de zonas duplicadas y en la validación de datos.
+
+#### Estrategia de Desacoplamiento
+Continuar utilizando la arquitectura hexagonal para mantener el desacoplamiento entre la lógica de negocio y las dependencias tecnológicas. Esto facilita la incorporación de nuevas tecnologías y permite que cada componente escale de forma independiente.
+
+Estas estrategias garantizarán que la aplicación se mantenga operativa y eficiente, incluso en condiciones de carga extrema.
 
 ## 11. Conclusión
 Esta solución proporciona una arquitectura escalable, eficiente y mantenible para la integración de eventos del proveedor externo en el marketplace de Fever.

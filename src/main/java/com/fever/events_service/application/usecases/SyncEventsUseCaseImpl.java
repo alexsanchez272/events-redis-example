@@ -36,6 +36,7 @@ public class SyncEventsUseCaseImpl implements SyncEventsUseCase {
             }
 
             Set<String> activeEventIds = eventPersistencePort.fetchActiveEventIds();
+            log.info("process=sync_events, active_event_ids_count={}", activeEventIds.size());
 
             Set<String> providerEventIds = providerEvents.stream()
                     .map(Event::getBaseEventId)
@@ -44,12 +45,15 @@ public class SyncEventsUseCaseImpl implements SyncEventsUseCase {
             Set<String> obsoleteIds = activeEventIds.stream()
                     .filter(id -> !providerEventIds.contains(id))
                     .collect(Collectors.toSet());
+            log.info("process=sync_events, obsolete_ids_count={}", obsoleteIds.size());
 
             if (!obsoleteIds.isEmpty()) {
                 eventPersistencePort.markEventsAsInactiveByIds(obsoleteIds);
+                log.info("process=sync_events, marked_inactive_count={}", obsoleteIds.size());
             }
 
             eventPersistencePort.saveOrUpdateEvents(providerEvents);
+            log.info("process=sync_events, saved_or_updated_count={}", providerEvents.size());
 
             updateCache(providerEvents);
 

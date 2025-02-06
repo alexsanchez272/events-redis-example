@@ -1,7 +1,9 @@
 package com.fever.events_service.infrastructure.config;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fever.events_service.infrastructure.adapters.out.http.ProviderApi;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -10,8 +12,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
-
-import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class RetrofitConfig {
@@ -25,18 +25,17 @@ public class RetrofitConfig {
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .writeTimeout(30, TimeUnit.SECONDS)
                 .addInterceptor(loggingInterceptor)
                 .build();
 
-        ObjectMapper xmlMapper = new XmlMapper();
+        ObjectMapper objectMapper = new XmlMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         return new Retrofit.Builder()
                 .baseUrl(providerUrl)
                 .client(okHttpClient)
-                .addConverterFactory(JacksonConverterFactory.create(xmlMapper))
+                .addConverterFactory(JacksonConverterFactory.create(objectMapper))
                 .build();
     }
 

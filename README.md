@@ -427,44 +427,75 @@ Estas estrategias garantizarán que la aplicación se mantenga operativa y efici
 Esta solución proporciona una arquitectura escalable, eficiente y mantenible para la integración de eventos del proveedor externo en el marketplace de Fever.
 
 
-...
-## Prerequisites
+# 🚀 Fever Events Service - Setup Guide
 
-Before you begin, ensure you have the following installed:
+Este documento explica cómo configurar y ejecutar **Fever Events Service** en tu entorno local.
 
-- **Java Development Kit (JDK) 17** or later
-- **Maven 3.6** or later
-- **PostgreSQL 13** or later
-- **Docker**
+## 📌 Prerrequisitos
+Antes de comenzar, asegúrate de tener instalado lo siguiente:
+
+- **Java Development Kit (JDK) 17 o posterior** 
+- **Maven 3.6 o posterior** 
+- **PostgreSQL 13 o posterior** 
+- **Docker y Docker Compose** 
 
 ---
 
-## Setup
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/your-organization/fever-events-service.git
-cd fever-events-service
-```
-
-### 2. Configure application properties
-
-Copy the `application.properties.example` file to `application.properties` and update the database connection details:
+## 1️⃣ Clonar el repositorio
+Ejecuta los siguientes comandos para clonar el proyecto:
 
 ```bash
-cp src/main/resources/application.properties.example src/main/resources/application.properties
+git clone https://github.com/FeverCodeChallenge/manuel.sanchez.git
+cd manuel.sanchez
 ```
 
-Edit `src/main/resources/application.properties` and update the following properties:
+---
+
+## 2️⃣ Configurar las propiedades de la aplicación
+La aplicación requiere configurar la conexión a la base de datos y otros servicios.
+
+### 🔹 Configuración actual (desarrollo)
+Actualmente, los parámetros de configuración están definidos explícitamente en el archivo `application.properties`, ya que la aplicación está en fase de desarrollo.
+Para ejecutar la aplicación localmente, edita el archivo y actualiza las credenciales de la base de datos:
 
 ```properties
 spring.datasource.url=jdbc:postgresql://localhost:5432/fever_events
-spring.datasource.username=your_username
-spring.datasource.password=your_password
+spring.datasource.username=tu_usuario
+spring.datasource.password=tu_contraseña
 ```
 
-### 3. Build the project
+### ⚠️ Recomendación para entornos de producción
+Por seguridad, **NO** se recomienda almacenar credenciales sensibles en archivos de configuración. En lugar de esto, usa **variables de entorno** o un **gestor de secretos** (como Vault, AWS Secrets Manager, Azure Key Vault, etc.).
+
+---
+
+## 3️⃣ Levantar servicios con Docker
+Antes de compilar y ejecutar la aplicación, es necesario iniciar **PostgreSQL y Redis** usando `docker-compose`:
+
+```bash
+docker-compose up -d
+```
+
+✅ **IMPORTANTE**: Este paso es obligatorio antes de ejecutar `mvn clean install`, ya que la aplicación necesita PostgreSQL y Redis para funcionar.
+
+Para verificar que los servicios están corriendo:
+
+```bash
+docker ps
+```
+
+Si necesitas detener los servicios:
+
+```bash
+docker-compose down
+```
+💡 Nota sobre futuras mejoras en los tests
+En una próxima fase de desarrollo, se debe modificar la configuración de los tests para utilizar una base de datos en memoria que simule el comportamiento de PostgreSQL (por ejemplo, Testcontainers o H2 con dialecto PostgreSQL). Esto permitirá ejecutar las pruebas sin necesidad de tener PostgreSQL y Redis en ejecución, mejorando la portabilidad y automatización del proceso de pruebas.
+---
+
+## 4️⃣ Construir la aplicación
+
+Una vez levantados los servicios con Docker, compila el proyecto con:
 
 ```bash
 mvn clean install
@@ -472,76 +503,133 @@ mvn clean install
 
 ---
 
-## Running the Application
+## 5️⃣ Ejecutar la aplicación
 
-### Run locally
+### 🔹 Opción 1: Ejecutar localmente
+
+Ejecuta la aplicación en tu máquina:
 
 ```bash
 mvn spring-boot:run
 ```
 
-The application will start and listen on [`http://localhost:8080`](http://localhost:8080).
+La aplicación estará disponible en:
+📌 [http://localhost:8080](http://localhost:8080)
 
-### Run with Docker
+### 🔹 Opción 2: Ejecutar con Docker
+Si prefieres ejecutar la aplicación dentro de un contenedor Docker:
 
-1. Build the Docker image:
+#### Construir la imagen Docker:
+```bash
+docker build -t fever-events-service .
+```
 
-   ```bash
-   docker build -t fever-events-service .
-   ```
-
-2. Run the container:
-
-   ```bash
-   docker run -p 8080:8080 fever-events-service
-   ```
+#### Ejecutar el contenedor:
+```bash
+docker run -p 8080:8080 fever-events-service
+```
 
 ---
 
-## Running Tests
-
-Execute the following command to run the tests:
+## 6️⃣ Ejecutar pruebas
+Ejecuta los tests unitarios y de integración con:
 
 ```bash
 mvn test
 ```
 
+📝 **Nota**: Si los tests fallan por problemas de conexión con PostgreSQL o Redis, asegúrate de que `docker-compose` está corriendo.
+
 ---
 
-### Database Migrations
+## 7️⃣ Migraciones de Base de Datos (Flyway)
+La aplicación usa **Flyway** para gestionar las migraciones de la base de datos.
 
-This project uses **Flyway** for database migrations. Migrations are automatically applied when the application starts. If you need to manually trigger a migration, use:
+- Las migraciones se ejecutan automáticamente al iniciar la aplicación.
+- Si necesitas aplicarlas manualmente, usa:
 
 ```bash
 mvn flyway:migrate
 ```
 
-### Monitoring
-
-The application exposes health and metrics endpoints:
-
-- **Health:** [`http://localhost:8080/actuator/health`](http://localhost:8080/actuator/health)
-- **Metrics:** [`http://localhost:8080/actuator/metrics`](http://localhost:8080/actuator/metrics)
-
----
-
-## Troubleshooting
-
-If you encounter any issues with Flyway migrations, you can clean the database and start fresh:
+### 🔹 Limpiar la base de datos y aplicar migraciones desde cero
+Si hay errores con las migraciones, puedes limpiar y reaplicar todas:
 
 ```bash
 mvn flyway:clean
+mvn flyway:migrate
 ```
-
-Then, run the application again to apply all migrations.
 
 ---
 
-## API Documentation
+## 8️⃣ Monitoreo y Salud de la Aplicación
+La aplicación expone endpoints para verificar su estado:
 
-The API documentation is available via **Swagger UI**. Once the application is running, you can access it at:
+- **Estado de salud**: [http://localhost:8080/actuator/health](http://localhost:8080/actuator/health)
 
-[`http://localhost:8080/swagger-ui.html`](http://localhost:8080/swagger-ui.html)
+---
 
-This provides an interactive interface to explore and test the API endpoints.
+## 9️⃣ Documentación de la API (Swagger)
+Para ver la documentación interactiva de la API, accede a:
+
+📌 [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+
+Esto te permitirá explorar y probar los endpoints fácilmente.
+
+---
+
+## 🛠️ Solución de Problemas
+
+### 🔹 PostgreSQL no se conecta
+Si ves un error como:
+
+```pgsql
+Connection to localhost:5432 refused. Check that the hostname and port are correct.
+```
+**Solución**: Asegúrate de que PostgreSQL está corriendo con:
+```bash
+docker-compose up -d
+```
+
+### 🔹 Redis no está disponible
+Si ves un error relacionado con Redis:
+
+```pgsql
+Cannot connect to Redis on localhost:6379.
+```
+**Solución**: Asegúrate de que Redis está corriendo con:
+```bash
+docker-compose up -d
+```
+
+### 🔹 Errores en las migraciones de Flyway
+Si Flyway falla al iniciar:
+
+```bash
+mvn flyway:clean
+mvn flyway:migrate
+```
+
+---
+
+## 🎯 Resumen del proceso
+
+| Paso | Acción |
+|------|--------|
+| 1️⃣ | Clonar el repositorio (`git clone`) |
+| 2️⃣ | Configurar `application.properties` |
+| 3️⃣ | Levantar `docker-compose up -d` |
+| 4️⃣ | Compilar con `mvn clean install` |
+| 5️⃣ | Ejecutar la aplicación (`mvn spring-boot:run` o con Docker) |
+| 6️⃣ | Ejecutar los tests (`mvn test`) |
+| 7️⃣ | Verificar migraciones (`mvn flyway:migrate`) |
+| 8️⃣ | Monitorear la aplicación (`/actuator/health`, `/actuator/metrics`) |
+| 9️⃣ | Acceder a la API en [Swagger UI](http://localhost:8080/swagger-ui.html) |
+
+---
+
+## 🚀 Conclusión
+Esta guía te permite configurar y ejecutar **Fever Events Service** de forma clara y estructurada.
+Si sigues estos pasos en orden, evitarás errores y facilitarás la ejecución de la aplicación. 🔥🚀
+
 

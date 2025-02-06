@@ -1,0 +1,55 @@
+### Get Non-existent Event
+GET http://localhost:8080/api/events/search?startDate=2025-01-01T00:00:00&endDate=2025-01-02T00:00:00
+Accept: application/json
+
+### Get Valid Event - Camela en concierto
+GET http://localhost:8080/api/events/search?startDate=2021-06-30T20:00:00&endDate=2021-06-30T23:00:00
+Accept: application/json
+
+### Get Valid Event - Pantomima Full
+GET http://localhost:8080/api/events/search?startDate=2021-02-10T19:00:00&endDate=2021-02-10T22:00:00
+Accept: application/json
+
+### Get Valid Event - Los Morancos
+GET http://localhost:8080/api/events/search?startDate=2021-07-31T19:00:00&endDate=2021-07-31T22:00:00
+Accept: application/json
+
+### Get Multiple Events - Overlapping Time Range
+GET http://localhost:8080/api/events/search?startDate=2021-02-01T00:00:00&endDate=2021-08-01T00:00:00
+Accept: application/json
+
+### Get Events - Edge Case: Start of an Event
+GET http://localhost:8080/api/events/search?startDate=2021-06-30T21:00:00&endDate=2021-06-30T21:01:00
+Accept: application/json
+
+### Get Events - Edge Case: End of an Event
+GET http://localhost:8080/api/events/search?startDate=2021-06-30T21:59:00&endDate=2021-06-30T22:00:00
+Accept: application/json
+
+### Get Events - Invalid Date Range (Start After End)
+GET http://localhost:8080/api/events/search?startDate=2021-08-01T00:00:00&endDate=2021-07-01T00:00:00
+Accept: application/json
+
+### Get Events - Very Large Date Range
+GET http://localhost:8080/api/events/search?startDate=2020-01-01T00:00:00&endDate=2025-12-31T23:59:59
+Accept: application/json
+
+### Get Events - Date Range Before All Events
+GET http://localhost:8080/api/events/search?startDate=2020-01-01T00:00:00&endDate=2020-12-31T23:59:59
+Accept: application/json
+
+### Get Events - Date Range After All Events
+GET http://localhost:8080/api/events/search?startDate=2022-01-01T00:00:00&endDate=2022-12-31T23:59:59
+Accept: application/json
+
+### Get Events - Missing Start Date
+GET http://localhost:8080/api/events/search?endDate=2021-12-31T23:59:59
+Accept: application/json
+
+### Get Events - Missing End Date
+GET http://localhost:8080/api/events/search?startDate=2021-01-01T00:00:00
+Accept: application/json
+
+### Get Events - Invalid Date Format
+GET http://localhost:8080/api/events/search?startDate=2021-01-01&endDate=2021-12-31
+Accept: application/json

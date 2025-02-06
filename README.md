@@ -366,17 +366,17 @@ El servicio está diseñado para soportar escalabilidad horizontal y despliegue 
 | **Integración con el Proveedor** | Retrofit y mecanismos de resiliencia garantizan una comunicación robusta. |
 | **Optimización de Consultas** | PostgreSQL con índices mejora el rendimiento de búsqueda. |
 
-#### Conclusión
+### Conclusión
 
 Esta arquitectura **ofrece una base sólida para el crecimiento y mantenimiento del sistema**, alineándose con las mejores prácticas de diseño y garantizando flexibilidad, escalabilidad y rendimiento óptimo. La separación de capas y la adopción de estándares modernos permiten un desarrollo sostenible a largo plazo, asegurando que el microservicio pueda evolucionar sin comprometer su estabilidad ni su eficiencia.
 
 ## 8. Enfoque de Despliegue: Contenedores y Alternativas
 
-### 8.1 Uso de Docker y Docker Compose
+#### 8.1 Uso de Docker y Docker Compose
 - Microservicio: Spring Boot + PostgreSQL + Redis en contenedores.
 - Entorno de desarrollo reproducible.
 
-### 8.2 Propuesta de alternativas para Producción
+#### 8.2 Propuesta de alternativas para Producción
 - **Kubernetes:** Escalabilidad y gestión avanzada.
 - **Servicios en la Nube:** Amazon RDS y Amazon ElastiCache.
 

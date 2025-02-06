@@ -374,10 +374,9 @@ Continuing the use of hexagonal architecture to maintain separation between busi
 
 These strategies will ensure the application remains operational and efficient even under extreme load conditions.
 
----
-
+--- 
 ## 11. Conclusion
-This solution provides a scalable, efficient, and maintainable architecture for integrating external provider events into the Fever marketplace.
+ - This solution provides a scalable, efficient, and maintainable architecture for integrating external provider events into the Fever marketplace.
 ---
 
 # 🚀 Fever Events Service - Setup Guide

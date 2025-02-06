@@ -1,375 +1,317 @@
 # Fever Events Service
 
-## RFC – Integración de Eventos del Proveedor Externo en el Marketplace Fever
+# Table of Contents
 
-**Autor:** Manuel Sánchez del Campo  
-**Fecha:** 06-02-2025  
-**Revisión:** 1.0  
-**Estado:** Borrador / En revisión
+- [Fever Events Service](#fever-events-service)
+   - [RFC – External Provider Events Integration in the Fever Marketplace](#rfc--external-provider-events-integration-in-the-fever-marketplace)
+   - [1. Introduction](#1-introduction)
+   - [2. Background and Context](#2-background-and-context)
+      - [External Data Integration](#external-data-integration)
+      - [Persistence and Constant Updates](#persistence-and-constant-updates)
+      - [Exposure of Active Events](#exposure-of-active-events)
+      - [Performance and Resilience](#performance-and-resilience)
+      - [Robust and Scalable Architecture](#robust-and-scalable-architecture)
+   - [3. Objectives](#3-objectives)
+   - [4. Scope](#4-scope)
+   - [5. Problem Description](#5-problem-description)
+      - [Challenges](#challenges)
+   - [6. Persistence and Caching Strategy](#6-persistence-and-caching-strategy)
+      - [6.1. PostgreSQL as the Source of Truth](#61-postgresql-as-the-source-of-truth)
+      - [6.2. Redis as a Caching Layer](#62-redis-as-a-caching-layer)
+      - [6.3. Integration of Both Solutions](#63-integration-of-both-solutions)
+      - [6.4. Flow Diagram](#64-flow-diagram)
+   - [7. Event Update Strategy Analysis](#7-event-update-strategy-analysis)
+      - [Strategy 1: Selective ID Query and Bulk Update for Obsolete Events](#strategy-1-selective-id-query-and-bulk-update-for-obsolete-events)
+      - [Strategy 2: Direct Database Update Without Retrieving IDs](#strategy-2-direct-database-update-without-retrieving-ids)
+      - [Final Comparison](#final-comparison)
+      - [Conclusion](#conclusion)
+   - [8. Deployment Approach: Containers and Alternatives](#8-deployment-approach-containers-and-alternatives)
+   - [9. Additional Considerations](#9-additional-considerations)
+   - [10. Extra Mile: Scalability and Performance](#10-extra-mile-scalability-and-performance)
+   - [11. Conclusion](#11-conclusion)
 
-## Índice
+---
 
-1. [Introducción](#introducción)
-2. [Antecedentes y Contexto](#antecedentes-y-contexto)
-3. [Objetivos](#objetivos)
-4. [Alcance](#alcance)
-5. [Descripción del Problema](#descripción-del-problema)
-6. [Estrategia de Persistencia y Caching](#estrategia-de-persistencia-y-caching)
-   - [PostgreSQL como Fuente de Verdad](#postgresql-como-fuente-de-verdad)
-   - [Redis como Capa de Caché](#redis-como-capa-de-caché)
-   - [Integración de Ambas Soluciones](#integración-de-ambas-soluciones)
-7. [Decisión Arquitectónica del Microservicio](#decisión-arquitectónica-del-microservicio)
-   - [Arquitectura Hexagonal](#arquitectura-hexagonal-ports--adapters)
-   - [Diseño Basado en Dominio (DDD)](#diseño-basado-en-dominio-ddd---domain-driven-design)
-   - [Patrón CQRS Simplificado](#patrón-cqrs-simplificado)
-   - [Persistencia con PostgreSQL](#persistencia-con-postgresql)
-   - [Capa de Caché con Redis](#capa-de-caché-con-redis)
-   - [Integración con el Proveedor Externo](#integración-con-el-proveedor-externo)
-   - [Resiliencia y Manejo de Errores](#resiliencia-y-manejo-de-errores)
-   - [Escalabilidad y Despliegue](#escalabilidad-y-despliegue)
-   - [Beneficios ante los Requisitos](#beneficios-ante-los-requisitos)
-8. [Enfoque de Despliegue: Contenedores y Alternativas](#enfoque-de-despliegue-contenedores-y-alternativas)
-9. [Consideraciones Adicionales](#consideraciones-adicionales)
-10. [Extra Mile: Escalabilidad y Rendimiento](#extra-mile)
-11. [Conclusión](#conclusión)
+- [🚀 Fever Events Service - Setup Guide](#-fever-events-service---setup-guide)
+   - [📌 Prerequisites](#-prerequisites)
+   - [1️⃣ Clone the repository](#1️⃣-clone-the-repository)
+   - [2️⃣ Configure application properties](#2️⃣-configure-application-properties)
+   - [3️⃣ Start services with Docker](#3️⃣-start-services-with-docker)
+   - [4️⃣ Build the application](#4️⃣-build-the-application)
+   - [5️⃣ Run the application](#5️⃣-run-the-application)
+   - [6️⃣ Run tests](#6️⃣-run-tests)
+   - [7️⃣ Database Migrations (Flyway)](#7️⃣-database-migrations-flyway)
+   - [8️⃣ Application Monitoring and Health](#8️⃣-application-monitoring-and-health)
+   - [9️⃣ API Documentation (Swagger)](#9️⃣-api-documentation-swagger)
+   - [🛠️ Troubleshooting](#️-troubleshooting)
+   - [🎯 Process Summary](#-process-summary)
+   - [🚀 Conclusion](#-conclusion)
 
-## 1. Introducción
-Este documento describe la solución propuesta para integrar los eventos provenientes de un proveedor externo en el marketplace de Fever. La solución debe considerarse como un microservicio con pensamiento a largo plazo, permitiendo que futuros desarrolladores puedan mantener, escalar y evolucionar el código sin dificultad. Se abordarán aspectos de persistencia, caché distribuido, comunicación entre microservicios, despliegue en contenedores y estrategias de actualización de datos.
+## RFC – External Provider Events Integration in the Fever Marketplace
 
-## 2. Antecedentes y Contexto
-Fever dispone de un marketplace de eventos en constante crecimiento y se encuentra en una fase de expansión continua para incorporar nuevos proveedores. En este contexto, el desafío consiste en desarrollar un microservicio que cumpla con los siguientes objetivos:
+**Author:** Manuel Sánchez del Campo  
+**Date:** 06-02-2025  
+**Revision:** 1.0  
+**Status:** Draft / Under Review
 
-### Integración de Datos Externos
-- Obtener los eventos de un proveedor externo en formato XML.
-- Garantizar la correcta extracción y normalización de la información.
+## 1. Introduction
 
-### Persistencia y Actualización Constante
-- Almacenar de forma persistente la información recibida para mantener un histórico actualizado.
-- Mantener la base de datos sincronizada con la fuente externa.
-- Reflejar los cambios en tiempo real, actualizando el estado de los eventos según la disponibilidad indicada por el proveedor.
+This document describes the proposed solution for integrating events from an external provider into the Fever marketplace. The solution should be designed as a microservice with a long-term perspective, ensuring that future developers can maintain, scale, and evolve the code with ease. This document will cover aspects such as persistence, distributed caching, microservice communication, containerized deployment, and data update strategies.
 
-### Exposición de Eventos Activos
-- El endpoint `/search` debe exponer únicamente aquellos eventos activos.
-- Solo se mostrarán eventos en "sell mode online" y que estén activos por el proveedor al momento de la consulta.
+## 2. Background and Context
 
-### Rendimiento y Resiliencia
-- Garantizar tiempos de respuesta en el orden de cientos de milisegundos.
-- Implementar estrategias de caching y una arquitectura robusta.
-- Asegurar la disponibilidad del servicio incluso en presencia de fallos o retrasos en la comunicación con el proveedor externo.
+Fever operates a rapidly growing event marketplace and is in a continuous expansion phase to incorporate new providers. In this context, the challenge is to develop a microservice that meets the following objectives:
 
-### Arquitectura Robusta y Escalable
-- Implementar un patrón arquitectónico que facilite la escalabilidad, modularidad y mantenibilidad del servicio en el tiempo.
-- Asegurar que la solución pueda adaptarse a futuros cambios sin afectar el rendimiento o la estabilidad.
+### External Data Integration
+- Retrieve events from an external provider in XML format.
+- Ensure proper extraction and normalization of the information.
 
-El endpoint del proveedor es:
+### Persistence and Constant Updates
+- Persistently store received information to maintain an updated history.
+- Keep the database synchronized with the external source.
+- Reflect real-time changes, updating event statuses according to provider availability.
+
+### Exposure of Active Events
+- The `/search` endpoint must only expose active events.
+- Only events in "sell mode online" and marked as active by the provider at the time of the query should be displayed.
+
+### Performance and Resilience
+- Ensure response times within hundreds of milliseconds.
+- Implement caching strategies and a robust architecture.
+- Guarantee service availability even in the event of failures or delays in communication with the external provider.
+
+### Robust and Scalable Architecture
+- Implement an architectural pattern that facilitates scalability, modularity, and maintainability over time.
+- Ensure that the solution can adapt to future changes without impacting performance or stability.
+
+The provider's endpoint is:
 
 ```
 https://provider.code-challenge.feverup.com/api/events
 ```
 
-## 3. Objetivos
+## 3. Objectives
 
-- **Integración y Normalización:** Obtener, parsear y normalizar los eventos y zonas del XML del proveedor.
-- **Persistencia:** Almacenar la información en una base de datos (source-of-truth) con consultas optimizadas mediante índices y/o vistas materializadas.
-- **Caché Distribuido:** Implementar una capa de caché utilizando el patrón Cache-Aside, para reducir la latencia del endpoint `/search` en escenarios de alta carga (picos de 5k a 10k RPS).
-- **Endpoint de Búsqueda:** Exponer un endpoint REST que, utilizando parámetros `starts_at` y `ends_at`, devuelva los eventos vigentes con sus datos normalizados.
-- **Sincronización Asíncrona:** Desarrollar un proceso configurable que sincronice periódicamente la información con el proveedor, realizando inserciones, actualizaciones y desactivaciones (upsert).
-- **Despliegue en Contenedores:** Utilizar Docker y Docker Compose para el entorno de desarrollo, con posibilidad de migración a entornos orquestados en producción.
+- **Integration and Normalization:** Retrieve, parse, and normalize the provider's XML events and zones.
+- **Persistence:** Store information in a database (source-of-truth) with optimized queries using indexes and/or materialized views.
+- **Distributed Cache:** Implement a cache layer using the Cache-Aside pattern to reduce latency on the `/search` endpoint under high load scenarios (peaks of 5k to 10k RPS).
+- **Search Endpoint:** Expose a REST endpoint that, using `starts_at` and `ends_at` parameters, returns current events with normalized data.
+- **Asynchronous Synchronization:** Develop a configurable process that periodically synchronizes data with the provider, handling inserts, updates, and deactivations (upsert).
+- **Containerized Deployment:** Use Docker and Docker Compose for the development environment, with the possibility of migration to orchestrated production environments.
 
-## 4. Alcance
-Este RFC cubre la definición y estrategias de:
+## 4. Scope
 
-- Consumo y procesamiento del XML del proveedor.
-- Persistencia (modelado de datos, índices y estrategias de actualización).
-- Caché distribuido para el endpoint `/search`.
-- Definición de endpoints y estrategias de consulta (incluyendo validaciones y manejo de errores).
-- Estrategia de sincronización y actualización (comparativa entre diferentes estrategias y explicación de la estrategia seleccionada).
+This RFC covers the definition and strategies for:
 
-## 5. Descripción del Problema
+- Consumption and processing of the provider's XML data.
+- Persistence (data modeling, indexing, and update strategies).
+- Distributed cache for the `/search` endpoint.
+- Definition of endpoints and query strategies (including validations and error handling).
+- Synchronization and update strategies (comparison of different strategies and rationale for the chosen approach).
 
-### Desafíos
+## 5. Problem Description
 
-- **Consumo y Procesamiento:** El proveedor ofrece un XML con eventos. Los eventos que dejan de estar disponibles no se incluyen en la respuesta.
-- **Identificación de Eventos:** Se recomienda utilizar `base_event_id` como identificador único.
-- **Manejo de Zonas Duplicadas:** Consolidación de información cuando `zone_id` se repite dentro de un evento.
-- **Temporalidad y Rango:** El endpoint `/search` deberá aceptar parámetros `starts_at` y `ends_at` y devolver exclusivamente los eventos que coincidan dentro de este rango de fechas, tengan un `sell_mode` online y que se encuentren activos en el momento de la consulta.
-- **Rendimiento y Resiliencia:** Garantizar respuestas en el orden de cientos de milisegundos mediante el uso de una arquitectura que combine un gestor de base de datos optimizado y un sistema de cache, asegurando así la disponibilidad y rapidez del endpoint  `search` sin depender de la latencia o disponibilidad del proveedor externo.
-- **Sincronización:** Job asíncrono con frecuencia configurable.
+### Challenges
 
-## 6. Estrategia de Persistencia y Caching
+- **Consumption and Processing:** The provider delivers an XML with events. Events that are no longer available are not included in the response.
+- **Event Identification:** It is recommended to use `base_event_id` as the unique identifier.
+- **Handling Duplicate Zones:** Consolidation of information when `zone_id` is repeated within an event.
+- **Temporality and Range:** The `/search` endpoint must accept `starts_at` and `ends_at` parameters and return only events that match the specified date range, have an online `sell_mode`, and are active at the time of the query.
+- **Performance and Resilience:** Ensure responses within hundreds of milliseconds using a combination of an optimized database management system and a caching system, ensuring the availability and speed of the `/search` endpoint without relying on the latency or availability of the external provider.
+- **Synchronization:** Configurable asynchronous job frequency.
 
-### 6.1. PostgreSQL como Fuente de Verdad
+## 6. Persistence and Caching Strategy
 
-#### Almacenamiento Persistente
-PostgreSQL se utilizará para guardar la información completa de los eventos y sus zonas. Es la base de datos de registro principal (*source-of-truth*), donde se registrarán:
+### 6.1. PostgreSQL as the Source of Truth
 
-- **Datos de eventos**: Identificadores, títulos, fechas, períodos de venta, etc.
-- **Datos de zonas asociadas**: Capacidad, precio, etc.
+#### Persistent Storage
+PostgreSQL will be used to store complete event and zone data. It serves as the primary database (*source-of-truth*), where the following information will be recorded:
 
-#### Optimización de Consultas
+- **Event Data:** Identifiers, titles, dates, sales periods, etc.
+- **Associated Zone Data:** Capacity, price, etc.
 
-- **Índices**: Se crearán índices en campos críticos como `event_start_date` y `event_end_date` para facilitar la consulta por rangos de fechas.
-- **Consultas Eficientes**: Se diseñarán consultas SQL optimizadas para que el filtrado por fechas sea rápido, aprovechando los índices y, de ser necesario, vistas materializadas en escenarios complejos.
+#### Query Optimization
 
-#### Escalabilidad de Lectura
+- **Indexes:** Indexes will be created on critical fields like `event_start_date` and `event_end_date` to facilitate range queries.
+- **Efficient Queries:** Optimized SQL queries will be designed to ensure fast filtering by date, leveraging indexes and, if necessary, materialized views for complex scenarios.
 
-En un escenario de alta carga, se puede optar por:
-- **Réplicas de lectura**: Configurar réplicas de PostgreSQL para distribuir la carga de consultas, manteniendo la consistencia de los datos a través de replicación asíncrona.
+#### Read Scalability
 
----
-
-### 6.2. Redis como Capa de Caché
-
-#### Propósito del Caché
-
-Redis actuará como un caché en memoria para reducir la latencia en el endpoint `/search` y disminuir la carga directa sobre PostgreSQL. Dado que se esperan picos de tráfico de **5k a 10k RPS**, el caché es clave para responder en el orden de **cientos de milisegundos**.
-
-#### Patrón de Cache Aside
-
-Se utilizará el patrón *cache-aside*:
-
-1. **Consulta Inicial**: Cuando llega una petición al endpoint, se verifica si existe un resultado cacheado en Redis para el conjunto de parámetros (`starts_at` y `ends_at`).
-2. **Cache Hit**: Si existe, se devuelve el resultado de Redis inmediatamente.
-3. **Cache Miss**: Si no existe, se consulta PostgreSQL, se procesa la respuesta y se almacena el resultado en Redis con un **TTL (time-to-live)** apropiado.
-
-#### Invalidación del Caché
-
-- La actualización de datos se realiza a través de un **job asíncrono** que sincroniza la información con el proveedor externo.
-- Tras actualizar PostgreSQL, se pueden **invalidar o refrescar** las entradas de caché relacionadas (por ejemplo, mediante eventos o simplemente con **TTLs cortos** en el caché que garanticen que la información no quede obsoleta durante mucho tiempo).
-
-#### Configuración de Redis
-
-- Se pueden definir **políticas de expiración** en función de la naturaleza de los datos.
-- Dado que la sincronización se ejecuta cada ciertos minutos, un **TTL de 1 a 5 minutos** para las claves cacheadas podría ser razonable.
-- En escenarios de picos, Redis se encargará de absorber la mayoría de las lecturas, asegurando que la consulta a la base de datos solo se produzca en caso de **cache miss**.
+In high-load scenarios, the following strategies can be adopted:
+- **Read Replicas:** Configure PostgreSQL replicas to distribute query load, maintaining data consistency through asynchronous replication.
 
 ---
 
-### 6.3. Integración de Ambas Soluciones
+### 6.2. Redis as a Caching Layer
 
-### Flujo General
+#### Cache Purpose
 
-#### **Actualización de Datos**
+Redis will act as an in-memory cache to reduce latency on the `/search` endpoint and lessen the direct load on PostgreSQL. Given expected traffic peaks of **5k to 10k RPS**, caching is crucial for response times within **hundreds of milliseconds**.
 
-1. Un proceso asíncrono (**job o scheduler**) consume el XML del proveedor y actualiza PostgreSQL.
-2. Tras la actualización, se invalidan o refrescan las claves de caché que puedan estar afectadas.
+#### Cache-Aside Pattern
 
-#### **Consulta del Endpoint `/search`**
+The *cache-aside* pattern will be implemented:
 
-1. Al recibir una solicitud, el sistema consulta Redis usando una **clave compuesta** (por ejemplo, hash de los parámetros `starts_at` y `ends_at`).
-2. **Si el valor existe en caché**, se devuelve inmediatamente.
-3. **Si no existe**, se consulta PostgreSQL, se genera la respuesta y se almacena en Redis.
+1. **Initial Query:** When a request reaches the endpoint, it checks if a cached result exists in Redis for the provided parameters (`starts_at` and `ends_at`).
+2. **Cache Hit:** If it exists, Redis returns the result immediately.
+3. **Cache Miss:** If not found, the query is made to PostgreSQL, the response is processed, and the result is stored in Redis with an appropriate **TTL (time-to-live)**.
 
-#### Beneficios
+#### Cache Invalidation
 
-- **Baja Latencia**: Redis permite respuestas en tiempos muy bajos (**sub-100 ms**) en escenarios de alto tráfico.
-- **Resiliencia**: El endpoint sigue respondiendo rápidamente incluso si hay retrasos en el *job* de sincronización o en la actualización de la base de datos.
-- **Escalabilidad**: La combinación de un **RDBMS** y una **capa de caché distribuida** permite manejar el escalado tanto a nivel de base de datos como a nivel de la aplicación.
+- Data updates occur through an **asynchronous job** that synchronizes information with the external provider.
+- After updating PostgreSQL, relevant cache entries can be **invalidated or refreshed** (e.g., using event-driven invalidation or short **TTLs** to prevent stale data).
 
-### 6.4 Diagrama del Flujo 
+#### Redis Configuration
 
-Flujo de llamada a `/search`
+- Define **expiration policies** based on data characteristics.
+- Given that synchronization runs at intervals, a **TTL of 1 to 5 minutes** for cached keys may be appropriate.
+- During peak loads, Redis will handle most read requests, ensuring database queries only occur in case of a **cache miss**.
+
+---
+
+### 6.3. Integration of Both Solutions
+
+#### **Data Update Process**
+
+1. An asynchronous process (**job or scheduler**) consumes the provider's XML and updates PostgreSQL.
+2. After updating, cache entries related to affected data are invalidated or refreshed.
+
+#### **Querying the `/search` Endpoint**
+
+1. Upon receiving a request, the system checks Redis using a **composite key** (e.g., hash of `starts_at` and `ends_at`).
+2. **If the value exists in cache**, it is returned immediately.
+3. **If not found**, PostgreSQL is queried, the response is generated, and stored in Redis.
+
+#### Benefits
+
+- **Low Latency:** Redis enables **sub-100 ms** response times under high traffic.
+- **Resilience:** The endpoint remains responsive even with delays in synchronization jobs or database updates.
+- **Scalability:** The combination of an **RDBMS** and a **distributed cache** supports both data and application scaling.
+
+### 6.4. Flow Diagram
+
+Call flow for `/search` endpoint.
 
 ```mermaid
 sequenceDiagram
-    participant C as Cliente
-    participant R as Controlador REST
-    participant RC as Redis Cache
-    participant PG as PostgreSQL
-    participant P as Procesador
+   participant S as Scheduler/Job
+   participant P as External Provider
+   participant X as XML Parser
+   participant DB as PostgreSQL
+   participant RC as Redis Cache
 
-    C->>R: GET /search?starts_at=X&ends_at=Y
-    R->>RC: Verificar cache
-    alt Resultado en cache
-        RC-->>R: Devolver resultado cacheado
-    else Cache miss
-        R->>PG: Consultar eventos
-        PG-->>R: Devolver resultados
-        R->>P: Procesar y formatear resultados
-        P-->>R: Resultados formateados
-        R->>RC: Almacenar en cache (con TTL)
-    end
-    R->>C: Devolver resultado al cliente
+   S->>P: Request events (GET /api/events)
+   alt Successful response
+      P-->>S: Return XML with events
+      S->>X: Parse XML
+      X->>S: Parsed events and zones
+      loop For each event
+         S->>DB: Verify event existence
+         alt Event exists
+            S->>DB: Update event and zones
+         else Event does not exist
+            S->>DB: Insert new event and zones
+         end
+         S->>RC: Invalidate/Update cache
+      end
+   else Error in response
+      S->>S: Log error and schedule retry
+   end
+   S->>S: Complete synchronization cycle
 ```
 
 Flujo del proceso de sincronizacion de datos desde el cliente y persistencia
 ```mermaid
 sequenceDiagram
    participant S as Scheduler/Job
-   participant P as Proveedor Externo
-   participant X as Parser XML
+   participant P as External Provider
+   participant X as XML Parser
    participant DB as PostgreSQL
    participant RC as Redis Cache
-   
-       S->>P: Solicitar eventos (GET /api/events)
-       alt Respuesta exitosa
-           P-->>S: Devolver XML de eventos
-           S->>X: Parsear XML
-           X->>S: Eventos y zonas parseados
-           loop Para cada evento
-               S->>DB: Verificar existencia del evento
-               alt Evento existe
-                   S->>DB: Actualizar evento y zonas
-               else Evento no existe
-                   S->>DB: Insertar nuevo evento y zonas
-               end
-               S->>RC: Invalidar/Actualizar cache
-           end
-       else Error en la respuesta
-           S->>S: Registrar error y programar reintento
-       end
-       S->>S: Finalizar ciclo de sincronización
+
+   S->>P: Request events (GET /api/events)
+   alt Successful response
+      P-->>S: Return XML with events
+      S->>X: Parse XML
+      X->>S: Parsed events and zones
+      loop For each event
+         S->>DB: Verify event existence
+         alt Event exists
+            S->>DB: Update event and zones
+         else Event does not exist
+            S->>DB: Insert new event and zones
+         end
+         S->>RC: Invalidate/Update cache
+      end
+   else Error in response
+      S->>S: Log error and schedule retry
+   end
+   S->>S: Complete
 ```
 
-## 7. Análisis de Estrategia para Actualización de Eventos en la BD
+## 7. Event Update Strategy Analysis
 
-### Estrategia 1: Consulta Selectiva de IDs y Bulk Update para Inactivar Eventos Obsoletos
+### Strategy 1: Selective ID Query and Bulk Update for Obsolete Events
 
-#### Pasos:
+#### Steps:
 
-1. **Consulta ligera**: Se realiza una consulta para obtener únicamente los identificadores (IDs) de los eventos activos del proveedor.
-2. **Cálculo de diferencia**: Se crea un conjunto de IDs que están en la base de datos pero no en la lista del proveedor (obsoletos).
-3. **Bulk update**: Se ejecuta una operación en bloque que actualiza el campo `active` a `false` para esos IDs.
-4. **Upsert de eventos del proveedor**: Se insertan o actualizan los eventos recibidos, marcándolos como `active = true`.
+1. **Lightweight Query**: Perform a query to retrieve only the identifiers (IDs) of active events from the provider.
+2. **Difference Calculation**: Create a set of IDs that exist in the database but are not in the provider’s list (obsolete events).
+3. **Bulk Update**: Execute a bulk operation to update the `active` field to `false` for those obsolete IDs.
+4. **Upsert Provider Events**: Insert or update the received events, marking them as `active = true`.
 
-#### Ventajas:
+#### Advantages:
 
-- **Eficiencia en la consulta**: La consulta de IDs es muy ligera y rápida, consumiendo poco ancho de banda y memoria.
-- **Optimización en la BD**: El bulk update de IDs obsoletos es una operación eficiente en el motor de la base de datos.
-- **Menor carga en la capa de aplicación**: Se evita traer objetos completos, reduciendo la memoria y el procesamiento en la capa de negocio.
+- **Efficient Querying**: ID queries are lightweight and fast, consuming minimal bandwidth and memory.
+- **Optimized Database Operations**: Bulk updates for obsolete IDs are efficient for database engines.
+- **Reduced Application Load**: Avoids fetching full objects, reducing memory and processing load.
 
-#### Desventajas:
+#### Disadvantages:
 
-- **Complejidad en la lógica**: Se requieren métodos adicionales en el repositorio y cálculos de diferencia en la aplicación.
-- **Dependencia en la consistencia de los IDs**: Es crucial garantizar que los IDs sean únicos y bien indexados.
-
----
-
-### Estrategia 2: Actualización Directa de la BD Sin Recuperar IDs
-
-#### Pasos:
-
-1. **Bulk Inactivation Directo**: Se ejecuta una consulta que marca `active = false` para todos los eventos en la BD cuyo `baseEventId` no se encuentre en la lista del proveedor.
-2. **Upsert de eventos del proveedor**: Se insertan o actualizan los eventos recibidos, estableciendo `active = true`.
-
-#### Ventajas:
-
-- **Simplicidad en la implementación**: Se evita traer IDs y calcular la diferencia en la aplicación.
-- **Mantenimiento más sencillo**: Se reducen los pasos intermedios en la lógica de actualización.
-
-#### Desventajas:
-
-- **Carga en la BD**: Si la tabla es grande, la consulta con `WHERE base_event_id NOT IN (...)` podría ser costosa.
-- **Complejidad en la Query SQL**: Requiere optimización si el feed es extenso.
+- **Complex Logic**: Requires additional repository methods and difference calculations in the application.
+- **Dependency on ID Consistency**: Ensuring unique and well-indexed IDs is crucial.
 
 ---
 
-### Comparación Final
+### Strategy 2: Direct Database Update Without Retrieving IDs
 
-| Criterio            | Estrategia 1 | Estrategia 2 |
+#### Steps:
+
+1. **Direct Bulk Inactivation**: Execute a query that sets `active = false` for all events in the database whose `baseEventId` is not in the provider’s list.
+2. **Upsert Provider Events**: Insert or update the received events, setting `active = true`.
+
+#### Advantages:
+
+- **Simpler Implementation**: Avoids retrieving IDs and computing differences in the application.
+- **Easier Maintenance**: Reduces intermediate steps in the update logic.
+
+#### Disadvantages:
+
+- **Database Load**: If the table is large, a query with `WHERE base_event_id NOT IN (...)` could be expensive.
+- **Complex SQL Querying**: Requires optimization for large datasets.
+
+---
+
+### Final Comparison
+
+| Criteria            | Strategy 1 | Strategy 2 |
 |---------------------|-------------|-------------|
-| **Simplicidad**     | Mayor complejidad en la capa de aplicación | Lógica más sencilla |
-| **Rapidez**         | Más eficiente con grandes volúmenes de datos | Puede ser más costosa en consultas grandes |
-| **Carga en la BD**  | Optimiza la carga con consultas ligeras | Requiere evaluar todos los registros activos |
-| **Escalabilidad**   | Más eficiente en bases de datos grandes | Depende de la optimización de la query |
+| **Simplicity**     | More complexity in application layer | Simpler logic |
+| **Speed**         | More efficient with large data volumes | Can be costly for large queries |
+| **Database Load**  | Optimized with lightweight queries | Requires evaluating all active records |
+| **Scalability**   | More efficient for large databases | Depends on query optimization |
 
 ---
 
-### Conclusión
+### Conclusion
 
-Dado un entorno con sincronización frecuente y gran volumen de registros, se recomienda **Estrategia 1: Consulta Selectiva de IDs y Bulk Update para Inactivar Eventos Obsoletos**, ya que:
+In an environment with frequent synchronization and a large volume of records, **Strategy 1: Selective ID Query and Bulk Update for Obsolete Events** is recommended because:
 
-- **Optimiza el procesamiento** al reducir la cantidad de datos transferidos y delegar la actualización en bloque al motor de la base de datos.
-- **Mejora la escalabilidad y eficiencia**, al actualizar solo los eventos obsoletos en lugar de comparar todos los registros activos.
-- **Reduce la carga en la aplicación**, evitando transferencias de objetos completos y trabajando solo con identificadores.
+- **Optimizes processing** by reducing transferred data and delegating bulk updates to the database engine.
+- **Improves scalability and efficiency** by updating only obsolete events instead of comparing all active records.
+- **Reduces application load**, avoiding full object transfers and working only with identifiers.
 
-Si bien la **Estrategia 2** es más sencilla de implementar, su mayor carga en la base de datos la hace menos adecuada en escenarios de gran volumen y alta concurrencia.
-
-### 8. Decisión Arquitectónica del Microservicio
-
-#### Enfoque General
-
-El microservicio ha sido diseñado siguiendo principios de **modularidad, escalabilidad y mantenibilidad**. La arquitectura elegida permite una evolución ágil del sistema, facilitando la incorporación de nuevas funcionalidades sin afectar su estabilidad. Se priorizó una estructura desacoplada para garantizar que cada componente pueda ser modificado o reemplazado sin impacto en el resto del sistema.
-
-### Principales Decisiones
-
-#### **1. Arquitectura Hexagonal (Ports & Adapters)**
-
-Se ha adoptado una **arquitectura hexagonal**, también conocida como **Puertos y Adaptadores**, debido a sus ventajas en términos de:
-
-- **Separación de preocupaciones:** La lógica de negocio está completamente aislada de los detalles de infraestructura y frameworks, promoviendo una estructura limpia y modular.
-- **Flexibilidad y Adaptabilidad:** Facilita el reemplazo de tecnologías o proveedores sin afectar la lógica de negocio.
-- **Testabilidad mejorada:** Permite realizar pruebas unitarias y de integración de manera más eficiente, sin dependencias de infraestructura.
-- **Independencia tecnológica:** Evita acoplamientos con frameworks específicos, asegurando mayor longevidad del código.
-
-La estructura del servicio se organiza en las siguientes capas:
-
-- **Dominio:** Contiene las reglas de negocio centrales y modelos de datos.
-- **Aplicación:** Define los casos de uso mediante puertos de entrada (*Input Ports*), asegurando que la lógica de negocio esté desacoplada de la implementación concreta.
-- **Infraestructura:** Implementa los adaptadores para interactuar con bases de datos, sistemas de caché y APIs externas a través de puertos de salida (*Output Ports*).
-
-#### **2. Diseño Basado en Dominio (DDD - Domain-Driven Design)**
-
-Se han aplicado principios de **Domain-Driven Design (DDD)** para modelar el dominio del servicio:
-
-- **Entidades y Agregados:** Se han definido modelos claros como `Event` y `Zone`, asegurando la integridad de los datos y la coherencia en las operaciones.
-- **Servicios de Dominio:** La lógica de negocio se encapsula en servicios de dominio que implementan reglas específicas del negocio de eventos.
-
-#### **3. Patrón CQRS Simplificado**
-
-Se ha implementado una versión simplificada de **Command Query Responsibility Segregation (CQRS)** para mejorar el rendimiento y escalabilidad:
-
-- **Consultas optimizadas:** La recuperación de datos utiliza índices y caché distribuido para mejorar la eficiencia.
-- **Separación de responsabilidades:** Las operaciones de consulta (`search`) y escritura (`sync`) están desacopladas, permitiendo optimizar cada proceso de manera independiente.
-
-#### **4. Persistencia con PostgreSQL**
-
-- Se ha elegido **PostgreSQL** como base de datos principal, aprovechando sus capacidades de indexación y escalabilidad. .
-- **Flyway** gestiona la versión de esquemas y migraciones de datos.
-
-#### **5. Capa de Caché con Redis**
-
-Para reducir la latencia en la consulta de eventos activos, se ha implementado una **capa de caché distribuida** basada en **Redis**, siguiendo un patrón **Cache-Aside**:
-
-- **Consultas rápidas:** Permite respuestas en milisegundos sin acceder a la base de datos en cada solicitud.
-- **TTL dinámico:** Se configura un tiempo de vida adecuado para evitar inconsistencias en datos desactualizados.
-- **Invalidación eficiente:** La caché se refresca tras cada ciclo de sincronización con el proveedor externo.
-
-#### **6. Integración con el Proveedor Externo**
-
-- Se utiliza **Retrofit** para el consumo de la API del proveedor externo, garantizando una integración robusta y flexible.
-- Se implementan mecanismos de **reintento automático y circuit breaker** con **Resilience4j** para manejar fallos en la comunicación.
-- La sincronización se realiza de manera **asíncrona y configurable**, asegurando que la información de eventos esté siempre actualizada.
-
-#### **7. Resiliencia y Manejo de Errores**
-
-Para garantizar la estabilidad del servicio ante fallos externos o problemas de conectividad:
-
-- **Resilience4j** gestiona **circuit breakers, retries y bulkheads**, mejorando la tolerancia a fallos.
-- **Monitoreo con Prometheus y Grafana**, permitiendo visualizar métricas clave y detectar posibles cuellos de botella.
-- **Logs estructurados con SLF4J y Logback**, facilitando la trazabilidad de errores.
-
-#### **8. Escalabilidad y Despliegue**
-
-El servicio está diseñado para soportar escalabilidad horizontal y despliegue en entornos productivos mediante **Docker y Kubernetes**:
-
-- **Contenedores Docker:** Facilitan el despliegue y replicación del servicio.
-- **Gestión centralizada de logs y métricas** con herramientas como **ELK Stack o Prometheus/Grafana**.
-
-### Beneficios ante los Requisitos
-
-| Requisito                         | Beneficio de la Arquitectura |
-|-----------------------------------|------------------------------|
-| **Alta Disponibilidad y Resiliencia** | Redis permite respuestas rápidas y Resilience4j mitiga fallos en APIs externas. |
-| **Escalabilidad** | El diseño modular facilitan la escalabilidad horizontal. |
-| **Mantenibilidad** | La arquitectura hexagonal separa responsabilidades, simplificando la evolución del código. |
-| **Integración con el Proveedor** | Retrofit y mecanismos de resiliencia garantizan una comunicación robusta. |
-| **Optimización de Consultas** | PostgreSQL con índices mejora el rendimiento de búsqueda. |
-
-### Conclusión
-
-Esta arquitectura **ofrece una base sólida para el crecimiento y mantenimiento del sistema**, alineándose con las mejores prácticas de diseño y garantizando flexibilidad, escalabilidad y rendimiento óptimo. La separación de capas y la adopción de estándares modernos permiten un desarrollo sostenible a largo plazo, asegurando que el microservicio pueda evolucionar sin comprometer su estabilidad ni su eficiencia.
-
+While **Strategy 2** is simpler to implement, its higher database load makes it less suitable for high-volume and high-concurrency scenarios.
 ## 8. Enfoque de Despliegue: Contenedores y Alternativas
 
 #### 8.1 Uso de Docker y Docker Compose
@@ -426,23 +368,26 @@ Estas estrategias garantizarán que la aplicación se mantenga operativa y efici
 ## 11. Conclusión
 Esta solución proporciona una arquitectura escalable, eficiente y mantenible para la integración de eventos del proveedor externo en el marketplace de Fever.
 
+---
 
 # 🚀 Fever Events Service - Setup Guide
 
-Este documento explica cómo configurar y ejecutar **Fever Events Service** en tu entorno local.
+This document explains how to set up and run **Fever Events Service** in your local environment.
 
-## 📌 Prerrequisitos
-Antes de comenzar, asegúrate de tener instalado lo siguiente:
+## 📌 Prerequisites
 
-- **Java Development Kit (JDK) 17 o posterior** 
-- **Maven 3.6 o posterior** 
-- **PostgreSQL 13 o posterior** 
-- **Docker y Docker Compose** 
+Before getting started, make sure you have the following installed:
+
+- **Java Development Kit (JDK) 17 or later**
+- **Maven 3.6 or later**
+- **PostgreSQL 13 or later**
+- **Docker and Docker Compose**
 
 ---
 
-## 1️⃣ Clonar el repositorio
-Ejecuta los siguientes comandos para clonar el proyecto:
+## 1 Clone the repository
+
+Run the following commands to clone the project:
 
 ```bash
 git clone https://github.com/FeverCodeChallenge/manuel.sanchez.git
@@ -451,51 +396,57 @@ cd manuel.sanchez
 
 ---
 
-## 2️⃣ Configurar las propiedades de la aplicación
-La aplicación requiere configurar la conexión a la base de datos y otros servicios.
+## 2 Configure application properties
 
-### 🔹 Configuración actual (desarrollo)
-Actualmente, los parámetros de configuración están definidos explícitamente en el archivo `application.properties`, ya que la aplicación está en fase de desarrollo.
-Para ejecutar la aplicación localmente, edita el archivo y actualiza las credenciales de la base de datos:
+The application requires database connection settings and other services.
+
+### 🔹 Current configuration (development)
+
+Currently, the configuration parameters are explicitly defined in the `application.properties` file, as the application is in the development phase.  
+To run the application locally, edit the file and update the database credentials:
 
 ```properties
 spring.datasource.url=jdbc:postgresql://localhost:5432/fever_events
-spring.datasource.username=tu_usuario
-spring.datasource.password=tu_contraseña
+spring.datasource.username=your_username
+spring.datasource.password=your_password
 ```
 
-### ⚠️ Recomendación para entornos de producción
-Por seguridad, **NO** se recomienda almacenar credenciales sensibles en archivos de configuración. En lugar de esto, usa **variables de entorno** o un **gestor de secretos** (como Vault, AWS Secrets Manager, Azure Key Vault, etc.).
+### ⚠️ Recommendation for production environments
+
+For security reasons, **DO NOT** store sensitive credentials in configuration files. Instead, use **environment variables** or a **secrets manager** (such as Vault, AWS Secrets Manager, Azure Key Vault, etc.).
 
 ---
 
-## 3️⃣ Levantar servicios con Docker
-Antes de compilar y ejecutar la aplicación, es necesario iniciar **PostgreSQL y Redis** usando `docker-compose`:
+## 3 Start services with Docker
+
+Before compiling and running the application, you need to start **PostgreSQL and Redis** using `docker-compose`:
 
 ```bash
 docker-compose up -d
 ```
 
-✅ **IMPORTANTE**: Este paso es obligatorio antes de ejecutar `mvn clean install`, ya que la aplicación necesita PostgreSQL y Redis para funcionar.
+💪 **IMPORTANT**: This step is mandatory before running `mvn clean install`, as the application requires PostgreSQL and Redis to function.
 
-Para verificar que los servicios están corriendo:
+To check if the services are running:
 
 ```bash
 docker ps
 ```
 
-Si necesitas detener los servicios:
+To stop the services:
 
 ```bash
 docker-compose down
 ```
-💡 Nota sobre futuras mejoras en los tests
-En una próxima fase de desarrollo, se debe modificar la configuración de los tests para utilizar una base de datos en memoria que simule el comportamiento de PostgreSQL (por ejemplo, Testcontainers o H2 con dialecto PostgreSQL). Esto permitirá ejecutar las pruebas sin necesidad de tener PostgreSQL y Redis en ejecución, mejorando la portabilidad y automatización del proceso de pruebas.
+
+💡 **Note on future improvements for tests**  
+In a future development phase, test configurations should be modified to use an in-memory database that simulates PostgreSQL behavior (e.g., Testcontainers or H2 with PostgreSQL dialect). This will allow tests to run without requiring PostgreSQL and Redis, improving portability and test automation.
+
 ---
 
-## 4️⃣ Construir la aplicación
+## 4 Build the application
 
-Una vez levantados los servicios con Docker, compila el proyecto con:
+Once the services are up with Docker, compile the project with:
 
 ```bash
 mvn clean install
@@ -503,57 +454,63 @@ mvn clean install
 
 ---
 
-## 5️⃣ Ejecutar la aplicación
+## 5 Run the application
 
-### 🔹 Opción 1: Ejecutar localmente
+### 🔹 Option 1: Run locally
 
-Ejecuta la aplicación en tu máquina:
+Run the application on your machine:
 
 ```bash
 mvn spring-boot:run
 ```
 
-La aplicación estará disponible en:
+The application will be available at:  
 📌 [http://localhost:8080](http://localhost:8080)
 
-### 🔹 Opción 2: Ejecutar con Docker
-Si prefieres ejecutar la aplicación dentro de un contenedor Docker:
+### 🔹 Option 2: Run with Docker
 
-#### Construir la imagen Docker:
+If you prefer to run the application inside a Docker container:
+
+#### Build the Docker image:
+
 ```bash
 docker build -t fever-events-service .
 ```
 
-#### Ejecutar el contenedor:
+#### Run the container:
+
 ```bash
 docker run -p 8080:8080 fever-events-service
 ```
 
 ---
 
-## 6️⃣ Ejecutar pruebas
-Ejecuta los tests unitarios y de integración con:
+## 6 Run tests
+
+Execute unit and integration tests with:
 
 ```bash
 mvn test
 ```
 
-📝 **Nota**: Si los tests fallan por problemas de conexión con PostgreSQL o Redis, asegúrate de que `docker-compose` está corriendo.
+📝 **Note**: If tests fail due to connection issues with PostgreSQL or Redis, make sure `docker-compose` is running.
 
 ---
 
-## 7️⃣ Migraciones de Base de Datos (Flyway)
-La aplicación usa **Flyway** para gestionar las migraciones de la base de datos.
+## 7 Database Migrations (Flyway)
 
-- Las migraciones se ejecutan automáticamente al iniciar la aplicación.
-- Si necesitas aplicarlas manualmente, usa:
+The application uses **Flyway** to manage database migrations.
+
+- Migrations run automatically when the application starts.
+- If you need to apply them manually, use:
 
 ```bash
 mvn flyway:migrate
 ```
 
-### 🔹 Limpiar la base de datos y aplicar migraciones desde cero
-Si hay errores con las migraciones, puedes limpiar y reaplicar todas:
+### 🔹 Clean the database and reapply migrations from scratch
+
+If there are migration errors, you can clean and reapply all:
 
 ```bash
 mvn flyway:clean
@@ -562,48 +519,57 @@ mvn flyway:migrate
 
 ---
 
-## 8️⃣ Monitoreo y Salud de la Aplicación
-La aplicación expone endpoints para verificar su estado:
+## 8 Application Monitoring and Health
 
-- **Estado de salud**: [http://localhost:8080/actuator/health](http://localhost:8080/actuator/health)
+The application exposes endpoints to check its status:
+
+- **Health status**: [http://localhost:8080/actuator/health](http://localhost:8080/actuator/health)
 
 ---
 
-## 9️⃣ Documentación de la API (Swagger)
-Para ver la documentación interactiva de la API, accede a:
+## 9 API Documentation (Swagger)
+
+To view the interactive API documentation, visit:
 
 📌 [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 
-Esto te permitirá explorar y probar los endpoints fácilmente.
+This allows you to explore and test the endpoints easily.
 
 ---
 
-## 🛠️ Solución de Problemas
+## 🛠️ Troubleshooting
 
-### 🔹 PostgreSQL no se conecta
-Si ves un error como:
+### 🔹 PostgreSQL is not connecting
+
+If you see an error like:
 
 ```pgsql
 Connection to localhost:5432 refused. Check that the hostname and port are correct.
 ```
-**Solución**: Asegúrate de que PostgreSQL está corriendo con:
+
+**Solution**: Ensure PostgreSQL is running with:
+
 ```bash
 docker-compose up -d
 ```
 
-### 🔹 Redis no está disponible
-Si ves un error relacionado con Redis:
+### 🔹 Redis is unavailable
+
+If you see an error related to Redis:
 
 ```pgsql
 Cannot connect to Redis on localhost:6379.
 ```
-**Solución**: Asegúrate de que Redis está corriendo con:
+
+**Solution**: Ensure Redis is running with:
+
 ```bash
 docker-compose up -d
 ```
 
-### 🔹 Errores en las migraciones de Flyway
-Si Flyway falla al iniciar:
+### 🔹 Flyway migration errors
+
+If Flyway fails to start:
 
 ```bash
 mvn flyway:clean
@@ -612,24 +578,23 @@ mvn flyway:migrate
 
 ---
 
-## 🎯 Resumen del proceso
+## 🎯 Process Summary
 
-| Paso | Acción |
-|------|--------|
-| 1️⃣ | Clonar el repositorio (`git clone`) |
-| 2️⃣ | Configurar `application.properties` |
-| 3️⃣ | Levantar `docker-compose up -d` |
-| 4️⃣ | Compilar con `mvn clean install` |
-| 5️⃣ | Ejecutar la aplicación (`mvn spring-boot:run` o con Docker) |
-| 6️⃣ | Ejecutar los tests (`mvn test`) |
-| 7️⃣ | Verificar migraciones (`mvn flyway:migrate`) |
-| 8️⃣ | Monitorear la aplicación (`/actuator/health`, `/actuator/metrics`) |
-| 9️⃣ | Acceder a la API en [Swagger UI](http://localhost:8080/swagger-ui.html) |
+| Step | Action |
+|---|--------|
+| 1 | Clone the repository (`git clone`) |
+| 2 | Configure `application.properties` |
+| 3 | Start `docker-compose up -d` |
+| 4 | Compile with `mvn clean install` |
+| 5 | Run the application (`mvn spring-boot:run` or with Docker) |
+| 6 | Run tests (`mvn test`) |
+| 7 | Verify migrations (`mvn flyway:migrate`) |
+| 8 | Monitor the application (`/actuator/health`, `/actuator/metrics`) |
+| 9 | Access the API in [Swagger UI](http://localhost:8080/swagger-ui.html) |
 
 ---
 
-## 🚀 Conclusión
-Esta guía te permite configurar y ejecutar **Fever Events Service** de forma clara y estructurada.
-Si sigues estos pasos en orden, evitarás errores y facilitarás la ejecución de la aplicación. 🔥🚀
+## 🚀 Conclusion
 
-
+This guide provides a clear and structured way to set up and run **Fever Events Service**.  
+By following these steps in order, you will avoid errors and ensure a smooth execution of the application. 🔥🚀

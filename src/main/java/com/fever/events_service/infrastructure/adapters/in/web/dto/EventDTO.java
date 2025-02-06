@@ -1,5 +1,6 @@
 package com.fever.events_service.infrastructure.adapters.in.web.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
@@ -23,15 +24,19 @@ public record EventDTO(
         String organizerCompanyId,
 
         @Schema(description = "Start date and time of the event")
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         LocalDateTime startDate,
 
         @Schema(description = "End date and time of the event")
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         LocalDateTime endDate,
 
         @Schema(description = "Date and time when tickets start selling")
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         LocalDateTime sellFrom,
 
         @Schema(description = "Date and time when tickets stop selling")
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         LocalDateTime sellTo,
 
         @Schema(description = "Indicates if the event is sold out")

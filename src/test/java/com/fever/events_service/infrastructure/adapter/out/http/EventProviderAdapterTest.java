@@ -9,12 +9,17 @@ import com.fever.events_service.infrastructure.adapters.out.http.dto.ProviderOut
 import com.fever.events_service.infrastructure.adapters.out.http.mapper.ProviderEventMapper;
 import com.fever.events_service.infrastructure.adapters.out.http.ProviderApi;
 import com.fever.events_service.infrastructure.adapters.out.http.EventProviderAdapter;
+import io.micrometer.core.instrument.Clock;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleConfig;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -35,13 +40,25 @@ class EventProviderAdapterTest {
     private ProviderEventMapper providerEventMapper;
 
     @Mock
+    private MeterRegistry meterRegistry;
+
+    @Mock
+    private MeterRegistry.Config meterRegistryConfig;
+
+    @Mock
     private Call<ProviderEventListDTO> call;
 
     private EventProviderAdapter eventProviderAdapter;
 
     @BeforeEach
     void setUp() {
-        eventProviderAdapter = new EventProviderAdapter(providerApi, providerEventMapper);
+        // Initialize mocks
+        MockitoAnnotations.openMocks(this);
+
+        // Create a real SimpleMeterRegistry instead of mocking
+        meterRegistry = new SimpleMeterRegistry(SimpleConfig.DEFAULT, Clock.SYSTEM);
+
+        eventProviderAdapter = new EventProviderAdapter(providerApi, providerEventMapper, meterRegistry);
     }
 
     @Test

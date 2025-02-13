@@ -430,10 +430,10 @@ For security reasons, **DO NOT** store sensitive credentials in configuration fi
 
 ## 3 Start services with Docker
 
-Before compiling and running the application, you need to start **PostgreSQL and Redis** using `docker-compose`:
+From the root of the project, run the following command to build the images and start the containers using `docker-compose`:
 
 ```bash
-docker-compose up -d
+docker-compose up --build
 ```
 
 💪 **IMPORTANT**: This step is mandatory before running `mvn clean install`, as the application requires PostgreSQL and Redis to function.
@@ -485,7 +485,7 @@ If you prefer to run the application inside a Docker container:
 #### Build the Docker image:
 
 ```bash
-docker build -t fever-events-service .
+docker build -t events-service .
 ```
 
 #### Run the container:

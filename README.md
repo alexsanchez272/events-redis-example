@@ -1,9 +1,9 @@
-# Fever Events Service
+# Events Service
 
 # Table of Contents
 
-- [Fever Events Service](#fever-events-service)
-   - [RFC – External Provider Events Integration in the Fever Marketplace](#rfc--external-provider-events-integration-in-the-fever-marketplace)
+- [Events Service](#fever-events-service)
+   - [RFC – External Provider Events Integration in the Marketplace](#rfc--external-provider-events-integration-in-the-fever-marketplace)
    - [1. Introduction](#1-introduction)
    - [2. Background and Context](#2-background-and-context)
       - [External Data Integration](#external-data-integration)
@@ -32,7 +32,7 @@
 
 ---
 
-- [🚀 Fever Events Service - Setup Guide](#-fever-events-service---setup-guide)
+- [🚀 Events Service - Setup Guide](#-fever-events-service---setup-guide)
    - [📌 Prerequisites](#-prerequisites)
    - [1️⃣ Clone the repository](#1️⃣-clone-the-repository)
    - [2️⃣ Configure application properties](#2️⃣-configure-application-properties)
@@ -47,7 +47,7 @@
    - [🎯 Process Summary](#-process-summary)
    - [🚀 Conclusion](#-conclusion)
 
-## RFC – External Provider Events Integration in the Fever Marketplace
+## RFC – External Provider Events Integration in the Marketplace
 
 **Author:** Manuel Sánchez del Campo  
 **Date:** 06-02-2025  
@@ -56,11 +56,11 @@
 
 ## 1. Introduction
 
-This document describes the proposed solution for integrating events from an external provider into the Fever marketplace. The solution should be designed as a microservice with a long-term perspective, ensuring that future developers can maintain, scale, and evolve the code with ease. This document will cover aspects such as persistence, distributed caching, microservice communication, containerized deployment, and data update strategies.
+This document describes the proposed solution for integrating events from an external provider into the marketplace. The solution should be designed as a microservice with a long-term perspective, ensuring that future developers can maintain, scale, and evolve the code with ease. This document will cover aspects such as persistence, distributed caching, microservice communication, containerized deployment, and data update strategies.
 
 ## 2. Background and Context
 
-Fever operates a rapidly growing event marketplace and is in a continuous expansion phase to incorporate new providers. In this context, the challenge is to develop a microservice that meets the following objectives:
+Marketplace operates a rapidly growing event marketplace and is in a continuous expansion phase to incorporate new providers. In this context, the challenge is to develop a microservice that meets the following objectives:
 
 ### External Data Integration
 - Retrieve events from an external provider in XML format.
@@ -369,7 +369,7 @@ Implementing monitoring solutions (such as Datadog, openSearch / Prometheus, Gra
 #### Business Logic Optimization
 Periodically reviewing event processing and update logic to identify optimization opportunities, particularly in consolidating duplicate zones and validating data.
 
-Although this version of the application was designed to function as middleware between a specific provider and Fever, it would be beneficial to consider early on whether to support the integration of additional providers through this service in the future. In such a case, the current project structure should be extended with a new field, provider_id, which must be taken into account when persisting or querying information in the database, as well as for any other necessary changes in the business logic. If this integration is required, it is advisable to address the change immediately during the development process to avoid extensive code refactoring later on.
+Although this version of the application was designed to function as middleware between a specific provider and the Marketplace, it would be beneficial to consider early on whether to support the integration of additional providers through this service in the future. In such a case, the current project structure should be extended with a new field, provider_id, which must be taken into account when persisting or querying information in the database, as well as for any other necessary changes in the business logic. If this integration is required, it is advisable to address the change immediately during the development process to avoid extensive code refactoring later on.
 
 #### Decoupling Strategy
 Continuing the use of hexagonal architecture to maintain separation between business logic and technological dependencies. This facilitates the integration of new technologies and allows each component to scale independently.
@@ -378,12 +378,12 @@ These strategies will ensure the application remains operational and efficient e
 
 --- 
 ## 11. Conclusion
- - This solution provides a scalable, efficient, and maintainable architecture for integrating external provider events into the Fever marketplace.
+ - This solution provides a scalable, efficient, and maintainable architecture for integrating external provider events into the marketplace.
 ---
 
-# 🚀 Fever Events Service - Setup Guide
+# 🚀 Events Service - Setup Guide
 
-This document explains how to set up and run **Fever Events Service** in your local environment.
+This document explains how to set up and run **Events Service** in your local environment.
 
 ## 📌 Prerequisites
 
@@ -607,5 +607,5 @@ mvn flyway:migrate
 
 ## 🚀 Conclusion
 
-This guide provides a clear and structured way to set up and run **Fever Events Service**.  
+This guide provides a clear and structured way to set up and run **Events Service**.  
 By following these steps in order, you will avoid errors and ensure a smooth execution of the application. 🔥🚀

@@ -1,6 +1,6 @@
-# Fever Events Service
+# Events Service
 
-## RFC – Integración de Eventos del Proveedor Externo en el Marketplace Fever
+## RFC – Integración de Eventos del Proveedor Externo en el Marketplace
 
 **Autor:** Manuel Sánchez del Campo  
 **Fecha:** 06-02-2025  
@@ -34,10 +34,10 @@
 11. [Conclusión](#conclusión)
 
 ## 1. Introducción
-Este documento describe la solución propuesta para integrar los eventos provenientes de un proveedor externo en el marketplace de Fever. La solución debe considerarse como un microservicio con pensamiento a largo plazo, permitiendo que futuros desarrolladores puedan mantener, escalar y evolucionar el código sin dificultad. Se abordarán aspectos de persistencia, caché distribuido, comunicación entre microservicios, despliegue en contenedores y estrategias de actualización de datos.
+Este documento describe la solución propuesta para integrar los eventos provenientes de un proveedor externo en el marketplace. La solución debe considerarse como un microservicio con pensamiento a largo plazo, permitiendo que futuros desarrolladores puedan mantener, escalar y evolucionar el código sin dificultad. Se abordarán aspectos de persistencia, caché distribuido, comunicación entre microservicios, despliegue en contenedores y estrategias de actualización de datos.
 
 ## 2. Antecedentes y Contexto
-Fever dispone de un marketplace de eventos en constante crecimiento y se encuentra en una fase de expansión continua para incorporar nuevos proveedores. En este contexto, el desafío consiste en desarrollar un microservicio que cumpla con los siguientes objetivos:
+Se dispone de un marketplace de eventos en constante crecimiento y se encuentra en una fase de expansión continua para incorporar nuevos proveedores. En este contexto, el desafío consiste en desarrollar un microservicio que cumpla con los siguientes objetivos:
 
 ### Integración de Datos Externos
 - Obtener los eventos de un proveedor externo en formato XML.
@@ -424,12 +424,12 @@ Continuar utilizando la arquitectura hexagonal para mantener el desacoplamiento 
 Estas estrategias garantizarán que la aplicación se mantenga operativa y eficiente, incluso en condiciones de carga extrema.
 
 ## 11. Conclusión
-Esta solución proporciona una arquitectura escalable, eficiente y mantenible para la integración de eventos del proveedor externo en el marketplace de Fever.
+Esta solución proporciona una arquitectura escalable, eficiente y mantenible para la integración de eventos del proveedor externo en el marketplace.
 
 
-# 🚀 Fever Events Service - Setup Guide
+# 🚀 Events Service - Setup Guide
 
-Este documento explica cómo configurar y ejecutar **Fever Events Service** en tu entorno local.
+Este documento explica cómo configurar y ejecutar **Events Service** en tu entorno local.
 
 ## 📌 Prerrequisitos
 Antes de comenzar, asegúrate de tener instalado lo siguiente:
@@ -629,7 +629,7 @@ mvn flyway:migrate
 ---
 
 ## 🚀 Conclusión
-Esta guía te permite configurar y ejecutar **Fever Events Service** de forma clara y estructurada.
+Esta guía te permite configurar y ejecutar **Events Service** de forma clara y estructurada.
 Si sigues estos pasos en orden, evitarás errores y facilitarás la ejecución de la aplicación. 🔥🚀
 
 

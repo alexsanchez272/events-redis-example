@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # PostgreSQL database service
   postgres:
     image: postgres:13
     container_name: fever-postgres
@@ -20,7 +19,6 @@ services:
       retries: 5
     restart: unless-stopped
 
-  # Redis cache service
   redis:
     image: redis:6
     container_name: fever-redis
@@ -35,9 +33,10 @@ services:
       retries: 5
     restart: unless-stopped
 
-#  # Spring Boot application service
 #  app:
-#    build: .
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
 #    container_name: fever-app
 #    ports:
 #      - "8080:8080"
@@ -58,7 +57,6 @@ services:
 #      SPRING_PROFILES_ACTIVE: dev
 #    restart: unless-stopped
 
-# Persistent volumes for data storage
 volumes:
-  postgres_data:  # Stores PostgreSQL data
-  redis_data:     # Stores Redis data
+  postgres_data:
+  redis_data:
